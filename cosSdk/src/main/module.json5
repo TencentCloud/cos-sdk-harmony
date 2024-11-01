@@ -1,0 +1,19 @@
+{
+  "module": {
+    "name": "cosSdk",
+    "type": "har",
+    "deviceTypes": [
+      "default",
+      "tablet",
+      "2in1"
+    ],
+    "requestPermissions":[
+      {
+        "name" : "ohos.permission.INTERNET",
+        "usedScene": {
+          "when":"always"
+        }
+      },
+    ]
+  }
+}

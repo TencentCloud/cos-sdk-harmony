@@ -1,0 +1,58 @@
+{
+  "app": {
+    "signingConfigs": [
+      {
+        "name": "debug",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "./debugSign/default_QCloudCosXml_t_D1xZJ4x6wqS1jzmtuwxlBTwt1SBugAetgBaYc9sUo=.cer",
+          "storePassword": "0000001BBE6422CCF39777405A1C62EBB11FA2ECA7EBEF807DAD6BA611EDB26CDAC6D6E360F29F4634BDFD",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001B0EF35FA562A3C8777067C3CB88AFA029CBA80C92CDD03817B89BD75CEC05BF6FBFA3A359AA34D5",
+          "profile": "./debugSign/default_QCloudCosXml_t_D1xZJ4x6wqS1jzmtuwxlBTwt1SBugAetgBaYc9sUo=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "./debugSign/default_QCloudCosXml_t_D1xZJ4x6wqS1jzmtuwxlBTwt1SBugAetgBaYc9sUo=.p12"
+        }
+      }
+      // release发布的时候配置（流水线）
+    ],
+    "products": [
+      {
+        "name": "default",
+        "signingConfig": "debug",
+        "compatibleSdkVersion": "5.0.0(12)",
+        "runtimeOS": "HarmonyOS",
+      }
+    ],
+    "buildModeSet": [
+      {
+        "name": "debug",
+      },
+      {
+        "name": "release"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "name": "cosTransferPractice",
+      "srcPath": "./cosTransferPractice",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "foundation",
+      "srcPath": "./foundation"
+    },
+    {
+      "name": "cosSdk",
+      "srcPath": "./cosSdk"
+    }
+  ]
+}

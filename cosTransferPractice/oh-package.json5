@@ -1,0 +1,15 @@
+{
+  "name": "costransferpractice",
+  "version": "1.0.0",
+  "description": "Please describe the basic information.",
+  "main": "",
+  "author": "",
+  "license": "",
+  "dependencies": {
+//    "@tencentcloud/cos": "file:../cosSdk"
+//    "@tencentcloud/cos": "file:./cosSdk-1.0.0.har"
+    "@tencentcloud/cos": "^1.0.0"
+  },
+  "devDependencies": {},
+  "dynamicDependencies": {}
+}

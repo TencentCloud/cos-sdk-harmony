@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_test_desc",
+      "value": "cosSdk test ability description"
+    },
+    {
+      "name": "TestAbility_desc",
+      "value": "the cosSdk test ability"
+    },
+    {
+      "name": "TestAbility_label",
+      "value": "cosSdk test"
+    }
+  ]
+}
