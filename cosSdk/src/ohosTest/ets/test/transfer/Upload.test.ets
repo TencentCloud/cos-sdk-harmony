@@ -15,7 +15,7 @@ import { TestConst } from '../common/TestConst';
 import { TestUtils } from '../common/TestUtils';
 import { ArrayList } from '@kit.ArkTS';
 import { Credential } from '../common/Credential';
-import { HttpHeader } from 'foundation';
+import { HttpHeader } from '@tencentcloud/foundation';
 
 export default function uploadTest(cosXmlBaseService: CosXmlBaseService) {
   describe('uploadTest', () => {

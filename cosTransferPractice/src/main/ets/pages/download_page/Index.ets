@@ -7,7 +7,7 @@ import { printError, sizeFormat } from '../../utils/Utils';
 @Entry
 @Component
 export struct DownloadPage {
-  @State filePath:string = getContext().filesDir + '/video.mp4';
+  @State filePath:string = getContext().filesDir + '/test_video.mp4';
   @State total:number = 0;
   @State value:number = 0;
   @State result:string = '';
@@ -20,47 +20,53 @@ export struct DownloadPage {
   }
 
   _downloadFile(){
-    this.reset();
-    this.pause = false;
-    let now = new Date().getTime() / 1000;
-    let getRequest = new GetObjectRequest(Const.TEST_BUCKET, Const.TEST_DOWNLOAD_PATH, this.filePath);
-    let task:DownloadTask = CosXmlBaseService.default().download(getRequest);
-    task.onProgress = (progress:HttpProgress)=>{
-      Logger.debug(`qqq total=${progress.target}   complete=${progress.complete}`)
-      this.total = progress.target;
-      this.value = progress.complete;
-    };
-    task.onResult = {
-      onSuccess:async (request, result)=>{
-        this.currentTask = undefined;
 
-        // crc64计算比较慢，大文件不太适合
-        // let fileHash = (await CRC64.crc64File(this.filePath)).toString();
-        // let crc64ecma: string = "";
-        // if(result.headers){
-        //   crc64ecma = result.headers["x-cos-hash-crc64ecma"];
-        // }
-        // Logger.info(`crc64：本地文件crc64为${fileHash} x-cos-hash-crc64ecma为${crc64ecma}`)
-        // if(fileHash === crc64ecma) {
-        //   let finish = new Date().getTime() / 1000;
-        //   this.result = '下载成功\n' + '下载平均速度：' + sizeFormat(this.total/((finish - now) || 1)) + '/S\n' + 'result\n' +  JSON.stringify(result,null,2) + '\n';
-        //   this.pause = true;
-        // } else {
-        //   this.result = `下载失败:crc64校验失败`
-        // }
+    try {
+      this.reset();
+      this.pause = false;
+      let now = new Date().getTime() / 1000;
+      let getRequest = new GetObjectRequest(Const.TEST_BUCKET, Const.TEST_DOWNLOAD_PATH, this.filePath);
+      let task:DownloadTask = CosXmlBaseService.default().download(getRequest);
+      task.onProgress = (progress:HttpProgress)=>{
+        Logger.debug(`qqq total=${progress.target}   complete=${progress.complete}`)
+        this.total = progress.target;
+        this.value = progress.complete;
+      };
+      task.onResult = {
+        onSuccess:async (request, result)=>{
+          this.currentTask = undefined;
 
-        let finish = new Date().getTime() / 1000;
-        this.result = '下载成功\n' + '下载平均速度：' + sizeFormat(this.total/((finish - now) || 1)) + '/S\n' + 'result\n' +  JSON.stringify(result,null,2) + '\n';
-        this.pause = true;
-      },
-      onFail:(request, error)=>{
-        this.result = `下载失败:
+          // crc64计算比较慢，大文件不太适合
+          // let fileHash = (await CRC64.crc64File(this.filePath)).toString();
+          // let crc64ecma: string = "";
+          // if(result.headers){
+          //   crc64ecma = result.headers["x-cos-hash-crc64ecma"];
+          // }
+          // Logger.info(`crc64：本地文件crc64为${fileHash} x-cos-hash-crc64ecma为${crc64ecma}`)
+          // if(fileHash === crc64ecma) {
+          //   let finish = new Date().getTime() / 1000;
+          //   this.result = '下载成功\n' + '下载平均速度：' + sizeFormat(this.total/((finish - now) || 1)) + '/S\n' + 'result\n' +  JSON.stringify(result,null,2) + '\n';
+          //   this.pause = true;
+          // } else {
+          //   this.result = `下载失败:crc64校验失败`
+          // }
+
+          let finish = new Date().getTime() / 1000;
+          this.result = '下载成功\n' + '下载平均速度：' + sizeFormat(this.total/((finish - now) || 1)) + '/S\n' + 'result\n' +  JSON.stringify(result,null,2) + '\n';
+          this.pause = true;
+        },
+        onFail:(request, error)=>{
+          this.result = `下载失败:
         ${printError(error)}`;
+        }
       }
+      task.start();
+      this.result = "开始下载";
+      this.currentTask = task;
+    } catch (e) {
+      console.log(e)
     }
-    task.start();
-    this.result = "开始下载";
-    this.currentTask = task;
+
   }
 
   scroller: Scroller = new Scroller()
