@@ -29,11 +29,12 @@ export class HttpRequest<T> {
   dnsOverHttps?: string;
   dnsServers?: string[];
   requestConfiguration?: rcp.Configuration;
+  progressGranularity?: number;
 
   constructor(method: http.RequestMethod, protocol: string, host: string, port: number, path: string,
     requestBodySerializer: RequestBodySerializer | undefined, responseBodyConverter: ResponseBodyConverter<T>,
     headers?: Map<string, string>, queries?: Map<string, string | undefined>, isNeedMD5?: boolean,
-    isSignedInURL?: boolean, requestConfiguration?: rcp.Configuration) {
+    isSignedInURL?: boolean, requestConfiguration?: rcp.Configuration, progressGranularity?: number) {
     this.method = method;
     this.protocol = protocol;
     this.host = host;
@@ -47,7 +48,8 @@ export class HttpRequest<T> {
     this.noSignQueryKeys = new Set();
     this.isNeedMD5 = isNeedMD5 || false;
     this.isSignedInURL = isSignedInURL || false;
-    this.requestConfiguration = requestConfiguration
+    this.requestConfiguration = requestConfiguration;
+    this.progressGranularity = progressGranularity;
   }
 
   addHeader(key: string, value: string): void {

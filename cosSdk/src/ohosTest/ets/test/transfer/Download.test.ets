@@ -110,6 +110,45 @@ export default function downloadTest(cosXmlBaseService: CosXmlBaseService) {
       }
       downloadTask.start();
     })
+
+    // it('big_522m', 0, async (done: Function) => {
+    //   let context = TestUtils.getContext();
+    //   let filePath = context.filesDir + '/big_object';
+    //   let request = new GetObjectRequest(TestConst.PERSIST_BUCKET, TestConst.PERSIST_BUCKET_BIG_FILE_PATH, filePath);
+    //   let config = new CosXmlServiceConfig(TestConst.PERSIST_BUCKET_REGION);
+    //   config.readTimeout = 15000 * 1000;
+    //   let credentialCallBack: CredentialCallBack|undefined;
+    //   if(cosXmlBaseService){
+    //     credentialCallBack = cosXmlBaseService.credentialCallBack;
+    //   } else {
+    //     credentialCallBack = CosXmlBaseService.default().credentialCallBack;
+    //   }
+    //   let cosBaseService = new CosXmlBaseService(context, config, credentialCallBack);
+    //   await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosBaseService));
+    //   let downloadTask = TestUtils.getCosXmlBaseService(cosXmlBaseService).download(request);
+    //   let progressCount = 0;
+    //   downloadTask.onProgress = (progress: HttpProgress)=>{
+    //     Logger.info(`已下载：${progress.complete}，总大小：${progress.target}`)
+    //     progressCount++;
+    //   }
+    //   downloadTask.onResult = {
+    //     onSuccess: async (request: GetObjectRequest, result: CosXmlDownloadTaskResult)=>{
+    //       Logger.info(`下载成功：`)
+    //       Logger.info(`下载_progressCount：${progressCount}/`)
+    //       Logger.info(result)
+    //       expect(true).assertTrue();
+    //       done();
+    //     },
+    //     onFail: (request: GetObjectRequest, error: CosError)=>{
+    //       Logger.info(`下载失败：`)
+    //       Logger.info(`下载_progressCount：${progressCount}/`)
+    //       TestUtils.printError(error);
+    //       expect().assertFail();
+    //       done();
+    //     }
+    //   }
+    //   downloadTask.start();
+    // })
     // it('big', 0, async (done: Function) => {
     //   let context = TestUtils.getContext();
     //   let filePath = context.filesDir + '/522m.zip';

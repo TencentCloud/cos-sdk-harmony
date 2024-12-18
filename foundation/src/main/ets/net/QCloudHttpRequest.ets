@@ -17,8 +17,8 @@ export class QCloudHttpRequest<T> extends HttpRequest<T> {
   constructor(method: http.RequestMethod, protocol: string, host: string, port: number, path: string,
     requestBodySerializer: RequestBodySerializer | undefined, responseBodyConverter: ResponseBodyConverter<T>,
     headers?: Map<string, string>, queries?: Map<string, string | undefined>, isNeedMD5?: boolean,
-    isSignedInURL?: boolean, requestConfiguration?: rcp.Configuration) {
+    isSignedInURL?: boolean, requestConfiguration?: rcp.Configuration, progressGranularity?: number) {
     super(method, protocol, host, port, path, requestBodySerializer, responseBodyConverter, headers, queries, isNeedMD5,
-      isSignedInURL, requestConfiguration);
+      isSignedInURL, requestConfiguration, progressGranularity);
   }
 }

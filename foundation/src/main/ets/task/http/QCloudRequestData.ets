@@ -9,4 +9,5 @@ export class QCloudRequestData extends Object{
   public cookies?: rcp.RequestCookies
   public transferRange?: rcp.TransferRange | rcp.TransferRange[]
   public requestConfiguration?: rcp.Configuration
+  public progressGranularity?: number
 }

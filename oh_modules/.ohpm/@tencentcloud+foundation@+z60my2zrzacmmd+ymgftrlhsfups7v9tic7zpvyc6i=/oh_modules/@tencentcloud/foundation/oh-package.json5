@@ -1,1 +1,0 @@
-{"name":"@tencentcloud/foundation","version":"1.1.0","description":"Tencent cloud cos sdk basic library","main":"Index.ets","author":"Cos","license":"Apache-2.0","devDependencies":{},"dynamicDependencies":{},"metadata":{"sourceRoots":["./src/main"],"debug":false},"compatibleSdkVersion":12,"compatibleSdkType":"HarmonyOS","obfuscated":false}

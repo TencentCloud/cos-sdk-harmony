@@ -68,6 +68,7 @@ export class QCloudHTTPTask<T> extends QCloudTask {
     this.requestData.content = this.httpRequest.buildBody();
     this.requestData.method = this.httpRequest.method;
     this.requestData.requestConfiguration = this.httpRequest.buildRequestConfiguration();
+    this.requestData.progressGranularity = this.httpRequest.progressGranularity;
     this.requestData.taskId = this.taskId;
     return true;
   }

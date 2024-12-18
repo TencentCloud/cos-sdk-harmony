@@ -29,15 +29,15 @@ export class QCloudTaskManager{
     this.requestQueue.customConcurrentCount = count;
   }
 
-  public addDownloadTask<T>(task:QCloudHTTPTask<T>){
+  public addDownloadTask(task:QCloudTask){
     this.downloadQueue.addTask(task);
   }
 
-  public addUploadTask<T>(task:QCloudHTTPTask<T>){
+  public addUploadTask(task:QCloudTask){
     this.uploadQueue.addTask(task);
   }
 
-  public addRequestTask<T>(task:QCloudHTTPTask<T>){
+  public addRequestTask(task:QCloudTask){
     this.requestQueue.addTask(task);
   }
 

@@ -229,19 +229,26 @@ export default function uploadTest(cosXmlBaseService: CosXmlBaseService) {
       let filePath = FileUtils.getFile(100 * 1024 * 1024,'bigUpload');
       let putRequest = new PutObjectRequest(TestConst.PERSIST_BUCKET, `uploadTest/UT/bigUpload`, filePath);
       await TestUtils.requestAddCredential(putRequest, TestUtils.getCosXmlBaseService(cosXmlBaseService));
-      let task: UploadTask = TestUtils.getCosXmlBaseService(cosXmlBaseService).upload(putRequest);
+      let task: UploadTask = TestUtils.getCosXmlBaseService(cosXmlBaseService).upload(
+        putRequest,
+
+      );
+      let progressCount = 0;
       task.onProgress = (progress: HttpProgress) => {
         Logger.info(`bigUpload_onProgress：${progress.complete}/${progress.target}`)
+        progressCount++;
       };
       task.onResult = {
         onSuccess: (request, result) => {
           Logger.info(`bigUpload_success`)
+          Logger.info(`bigUpload_progressCount：${progressCount}/`)
           Logger.info(result)
           expect(true).assertTrue();
           done();
         },
         onFail: (request, error) => {
           Logger.info(`bigUpload_fail`)
+          Logger.info(`bigUpload_progressCount：${progressCount}/`)
           Logger.info(error)
           expect().assertFail()
           done();

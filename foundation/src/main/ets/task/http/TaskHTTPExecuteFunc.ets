@@ -3,7 +3,7 @@ import { QCloudTransferData } from '../base/QCloudTransferData';
 import emitter from '@ohos.events.emitter';
 import http from '@ohos.net.http';
 import { QCloudRequestData } from './QCloudRequestData';
-import { HttpProgress } from '../../net/HttpProgress';
+import { HttpProgress, ProgressController } from '../../net/HttpProgress';
 import { QCloudLogger } from '../../logger/QCloudLogger';
 import { HashMap } from '@kit.ArkTS';
 import { rcp } from '@kit.RemoteCommunicationKit';
@@ -63,20 +63,21 @@ export function TaskHTTPExecuteFunc(qcloudRequestData: QCloudRequestData) {
     }
   }
 
+  const progressController = new ProgressController((progress: HttpProgress) => {
+    SendEvent(new QCloudTransferData(QCloudEventType.dataProgress, progress, null));
+  }, qcloudRequestData.progressGranularity);
   const customHttpEventsHandler: rcp.HttpEventsHandler = {
     onDataReceive: (incomingData: ArrayBuffer) => {
       SendEvent(new QCloudTransferData(QCloudEventType.dataReceive, incomingData, null));
     },
     onUploadProgress: (totalSize: number, transferredSize: number) => {
       if (qcloudRequestData.method == http.RequestMethod.PUT) {
-        SendEvent(new QCloudTransferData(QCloudEventType.dataProgress, new HttpProgress(transferredSize, totalSize),
-          null));
+        progressController.updateProgress(transferredSize, totalSize);
       }
     },
     onDownloadProgress: (totalSize: number, transferredSize: number) => {
       if (qcloudRequestData.method == http.RequestMethod.GET) {
-        SendEvent(new QCloudTransferData(QCloudEventType.dataProgress, new HttpProgress(transferredSize, totalSize),
-          null));
+        progressController.updateProgress(transferredSize, totalSize);
       }
     },
     onHeaderReceive: (headers: rcp.ResponseHeaders) => {
