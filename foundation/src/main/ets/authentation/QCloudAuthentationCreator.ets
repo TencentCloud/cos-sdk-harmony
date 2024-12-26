@@ -138,7 +138,9 @@ export class QCloudAuthentationCreator{
     const signKey = await CryptoUtil.qcloudHmacSha1(qKeyTime, SecretKey);
 
     let path = httpRequest.path;
-    if (path.length > 0 && path.substring(0,1) != '/') {
+    if (path.length == 0){
+      path = '/';
+    }else if (path.length > 0 && path.substring(0,1) != '/') {
       path = '/' + path;
     }
     if (path.includes("?")) {

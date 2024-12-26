@@ -1,7 +1,12 @@
 import util from '@ohos.util';
+import { buffer } from '@kit.ArkTS';
 
 export class StringUtils {
 
+  static stringToBuffer(src: string, encoding: buffer.BufferEncoding = 'utf-8'): ArrayBuffer {
+    let buf = buffer.from(src, encoding);
+    return buf.buffer
+  }
   /**
    * Uint8Array 转  String
    * @param input

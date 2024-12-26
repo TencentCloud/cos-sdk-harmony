@@ -46,7 +46,7 @@ export class CryptoUtil{
     return StringUtils.uint8Array2String(macOutput.data);
   }
 
-  static async qcloudMd5Str(str:string):Promise<string> {
+  static async qcloudMd5String(str:string):Promise<string> {
     return CryptoUtil.qcloudMd5ArrayBuffer(buffer.from(str, 'utf-8').buffer);
   }
 
@@ -66,5 +66,4 @@ export class CryptoUtil{
     let buffer1 = buffer.from(mdOutput.data);
     return buffer1.toString("base64");
   }
-
 }

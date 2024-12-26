@@ -94,23 +94,28 @@ export class HttpRequest<T> {
 
   async prepareRequestData() {
     let buffer = this.requestBodySerializer?.body();
-    if (this.isNeedMD5 && buffer && buffer instanceof ArrayBuffer) {
-      let md5 = await CryptoUtil.qcloudMd5ArrayBuffer(buffer);
-      this.addHeader(HttpHeader.CONTENT_MD5, md5);
+    if (this.isNeedMD5 && buffer) {
+      if (buffer instanceof ArrayBuffer) {
+        let md5 = await CryptoUtil.qcloudMd5ArrayBuffer(buffer);
+        this.addHeader(HttpHeader.CONTENT_MD5, md5);
+      }
+      if (typeof buffer == 'string') {
+        let md5 = await CryptoUtil.qcloudMd5String(buffer);
+        this.addHeader(HttpHeader.CONTENT_MD5, md5);
+      }
     }
+
 
     this.addHeader(HttpHeader.HOST, this.host);
 
     let contentType = this.requestBodySerializer?.contentType()
-    let contentLength = this.requestBodySerializer?.contentLength()
     if (!this.headers.get(HttpHeader.CONTENT_TYPE) && contentType) {
       this.addHeader(HttpHeader.CONTENT_TYPE, contentType);
     }
 
-    if (contentLength) {
+    if (this.requestBodySerializer) {
+      let contentLength = this.requestBodySerializer.contentLength()
       this.addHeader(HttpHeader.CONTENT_LENGTH, contentLength.toString());
-    } else {
-      this.addHeader(HttpHeader.CONTENT_LENGTH, "0");
     }
   }
 

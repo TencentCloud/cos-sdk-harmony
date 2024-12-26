@@ -1,9 +1,25 @@
 import { describe, beforeAll, beforeEach, afterEach, afterAll, it, expect } from '@ohos/hypium';
-import { CosError, CosErrorCode, CosXmlBaseService, CosXmlServiceConfig,
+import {
+  CosError,
+  CosErrorCode,
+  CosXmlBaseService,
+  CosXmlServiceConfig,
+  DeleteBucketTagRequest,
+  DeleteMultipleObjectRequest,
+  DeleteObject,
   DeleteObjectRequest,
+  DeleteObjectTagRequest,
+  GetBucketObjectVersionsRequest,
+  GetObjectTagRequest,
+  ListBucketsRequest,
+  ListObjectsRequest,
   PresignedUrlRequest,
+  PutBucketTagRequest,
   PutObjectRequest,
-  UploadTask} from '../../../../Index';
+  PutObjectTagRequest,
+  TagObject,
+  UploadTask
+} from '../../../../Index';
 import { GetObjectArrayBufferRequest } from '../../../main/ets/model/object/GetObjectArrayBufferRequest';
 import { GetObjectRequest } from '../../../main/ets/model/object/GetObjectRequest';
 import { HeadObjectRequest } from '../../../main/ets/model/object/HeadObjectRequest';
@@ -15,6 +31,9 @@ import { CredentialCallBack, HttpHeader, QCloudCredential, CredentialCache } fro
 import { BusinessError } from '@ohos.base';
 import { FileUtils } from './common/FileUtils';
 import { StsSessionQCloudCredentials } from './common/Credential';
+import { HeadBucketRequest } from '../../../main/ets/model/bucket/HeadBucketRequest';
+import { List } from '@kit.ArkTS';
+import { GetBucketTagRequest } from '../../../main/ets/model/bucket/GetBucketTagRequest';
 
 export default function cosServiceTest(cosXmlBaseService: CosXmlBaseService) {
   describe('cosServiceTest', () => {
@@ -44,13 +63,13 @@ export default function cosServiceTest(cosXmlBaseService: CosXmlBaseService) {
       try {
         let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).headObject(request)
         Logger.info(result)
-        if(result.eTag()){
+        if (result.eTag()) {
           let cosObjectType = result.cosObjectType()
-          if(cosObjectType){
+          if (cosObjectType) {
             Logger.info(cosObjectType)
           }
           let cosStorageClass = result.cosStorageClass()
-          if(cosStorageClass){
+          if (cosStorageClass) {
             Logger.info(cosStorageClass)
           }
           expect(true).assertTrue();
@@ -66,12 +85,13 @@ export default function cosServiceTest(cosXmlBaseService: CosXmlBaseService) {
     it('getObject', 0, async (done: Function) => {
       let context = TestUtils.getContext();
       let filesDir = context.filesDir;
-      let request = new GetObjectRequest(TestConst.PERSIST_BUCKET, TestConst.PERSIST_BUCKET_PIC_PATH, filesDir + '/test.jpg');
+      let request =
+        new GetObjectRequest(TestConst.PERSIST_BUCKET, TestConst.PERSIST_BUCKET_PIC_PATH, filesDir + '/test.jpg');
       await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
       try {
         let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).getObject(request)
         Logger.info(result)
-        if(result.httpCode && result.httpCode >= 200 && result.httpCode < 300){
+        if (result.httpCode && result.httpCode >= 200 && result.httpCode < 300) {
           expect(true).assertTrue();
         } else {
           expect().assertFail();
@@ -87,7 +107,7 @@ export default function cosServiceTest(cosXmlBaseService: CosXmlBaseService) {
       await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
       try {
         let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).getObjectToArrayBuffer(request)
-        if(result && result.byteLength > 0){
+        if (result && result.byteLength > 0) {
           Logger.info(result.byteLength.toString())
           expect(true).assertTrue();
         } else {
@@ -102,11 +122,12 @@ export default function cosServiceTest(cosXmlBaseService: CosXmlBaseService) {
     it('getObjectCancel', 0, async (done: Function) => {
       let context = TestUtils.getContext();
       let filesDir = context.filesDir;
-      let request = new GetObjectRequest(TestConst.PERSIST_BUCKET, TestConst.PERSIST_BUCKET_PIC_PATH, filesDir + '/test.jpg');
+      let request =
+        new GetObjectRequest(TestConst.PERSIST_BUCKET, TestConst.PERSIST_BUCKET_PIC_PATH, filesDir + '/test.jpg');
       await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
       try {
         request.onProgress = (httpProgress) => {
-          if(httpProgress.complete / httpProgress.target > 0.1){
+          if (httpProgress.complete / httpProgress.target > 0.1) {
             TestUtils.getCosXmlBaseService(cosXmlBaseService).cancel(request)
           }
         }
@@ -115,7 +136,7 @@ export default function cosServiceTest(cosXmlBaseService: CosXmlBaseService) {
         expect().assertFail();
       } catch (e) {
         TestUtils.printError(e);
-        if((e as CosError).cosErrorCode === CosErrorCode.USER_CANCELLED){
+        if ((e as CosError).cosErrorCode === CosErrorCode.USER_CANCELLED) {
           expect(true).assertTrue();
         } else {
           expect().assertFail();
@@ -124,7 +145,7 @@ export default function cosServiceTest(cosXmlBaseService: CosXmlBaseService) {
       done();
     })
     it('deleteObject', 0, async (done: Function) => {
-      let filePath = FileUtils.getFile(500 * 1024,'simpleUpload');
+      let filePath = FileUtils.getFile(500 * 1024, 'simpleUpload');
       let putRequest = new PutObjectRequest(TestConst.PERSIST_BUCKET, `uploadTest/UT/deleteFile`, filePath);
       await TestUtils.requestAddCredential(putRequest, TestUtils.getCosXmlBaseService(cosXmlBaseService));
       let task: UploadTask = TestUtils.getCosXmlBaseService(cosXmlBaseService).upload(putRequest);
@@ -135,7 +156,7 @@ export default function cosServiceTest(cosXmlBaseService: CosXmlBaseService) {
           try {
             let deleteResult = await TestUtils.getCosXmlBaseService(cosXmlBaseService).deleteObject(deleteObjectRequest)
             Logger.info(deleteResult)
-            if(deleteResult.httpCode && deleteResult.httpCode >= 200 && deleteResult.httpCode < 300){
+            if (deleteResult.httpCode && deleteResult.httpCode >= 200 && deleteResult.httpCode < 300) {
               expect(true).assertTrue();
             } else {
               expect().assertFail();
@@ -159,15 +180,18 @@ export default function cosServiceTest(cosXmlBaseService: CosXmlBaseService) {
     //
     // })
     it('presignedPut', 0, async (done: Function) => {
-      let request = new PresignedUrlRequest(TestConst.PERSIST_BUCKET, TestConst.PERSIST_BUCKET_PUT_PATH, http.RequestMethod.PUT);
+      let request =
+        new PresignedUrlRequest(TestConst.PERSIST_BUCKET, TestConst.PERSIST_BUCKET_PUT_PATH, http.RequestMethod.PUT);
       await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
       try {
         let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).buildPresignedUrl(request)
         Logger.info(result)
-        if(result){
+        if (result) {
           let httpRequest = http.createHttp();
           try {
-            let data = await httpRequest.request(result, { method: http.RequestMethod.PUT, extraData: 'data to put' });
+            let data = await httpRequest.request(result, {
+              method: http.RequestMethod.PUT, extraData: 'data to put'
+            });
             if (data.responseCode >= 200 && data.responseCode < 300) {
               httpRequest.destroy();
               expect(true).assertTrue();
@@ -190,15 +214,18 @@ export default function cosServiceTest(cosXmlBaseService: CosXmlBaseService) {
       done();
     })
     it('presignedGet', 0, async (done: Function) => {
-      let request = new PresignedUrlRequest(TestConst.PERSIST_BUCKET, TestConst.PERSIST_BUCKET_PIC_PATH, http.RequestMethod.GET);
+      let request =
+        new PresignedUrlRequest(TestConst.PERSIST_BUCKET, TestConst.PERSIST_BUCKET_PIC_PATH, http.RequestMethod.GET);
       await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
       try {
         let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).buildPresignedUrl(request)
         Logger.info(result)
-        if(result){
+        if (result) {
           let httpRequest = http.createHttp();
           try {
-            let data = await httpRequest.request(result, { method: http.RequestMethod.GET });
+            let data = await httpRequest.request(result, {
+              method: http.RequestMethod.GET
+            });
             if (data.responseCode >= 200 && data.responseCode < 300) {
               httpRequest.destroy();
               expect(true).assertTrue();
@@ -272,13 +299,13 @@ export default function cosServiceTest(cosXmlBaseService: CosXmlBaseService) {
       try {
         let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).headObject(request)
         Logger.info(result)
-        if(result.eTag()){
+        if (result.eTag()) {
           let cosObjectType = result.cosObjectType()
-          if(cosObjectType){
+          if (cosObjectType) {
             Logger.info(cosObjectType)
           }
           let cosStorageClass = result.cosStorageClass()
-          if(cosStorageClass){
+          if (cosStorageClass) {
             Logger.info(cosStorageClass)
           }
           expect(true).assertTrue();
@@ -292,18 +319,20 @@ export default function cosServiceTest(cosXmlBaseService: CosXmlBaseService) {
       done();
     })
     it('headObjectAuthenticationError', 0, async (done: Function) => {
-      let sessionCredential: CredentialCallBack = (request)=> {
+      let sessionCredential: CredentialCallBack = (request) => {
         return new Promise((resolve, reject) => {
           let httpRequest = http.createHttp();
           httpRequest.request(
             "http://66.66.66.66/stssss",
-            { method: http.RequestMethod.GET },
+            {
+              method: http.RequestMethod.GET
+            },
             (err: BusinessError, data: http.HttpResponse) => {
               if (!err) {
                 Logger.info(data, "QCloudCredentials_Response")
 
                 const stsSessionQCloudCredentials: StsSessionQCloudCredentials = JSON.parse(data.result.toString());
-                let credential : QCloudCredential= new QCloudCredential();
+                let credential: QCloudCredential = new QCloudCredential();
                 credential.secretID = stsSessionQCloudCredentials.credentials.tmpSecretId;
                 credential.secretKey = stsSessionQCloudCredentials.credentials.tmpSecretKey;
                 credential.token = stsSessionQCloudCredentials.credentials.sessionToken;
@@ -342,6 +371,229 @@ export default function cosServiceTest(cosXmlBaseService: CosXmlBaseService) {
       }
       done();
     })
+
+    it('bucketList', 0, async (done: Function) => {
+      let request = new ListBucketsRequest();
+      request.filterRegion = "ap-chongqing";
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).listBucket(request)
+        Logger.info(result)
+        if (result.httpCode && result.httpCode >= 200 && result.httpCode < 300) {
+          expect(true).assertTrue();
+        } else {
+          expect().assertFail();
+        }
+      } catch (e) {
+        TestUtils.printError(e);
+        expect().assertFail();
+      }
+      done();
+    })
+
+    it('objectList', 0, async (done: Function) => {
+      let request = new ListObjectsRequest(TestConst.PERSIST_BUCKET);
+      // request.prefix = "big_gif"
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).listObject(request)
+        Logger.info(result)
+        if (result.httpCode && result.httpCode >= 200 && result.httpCode < 300) {
+          expect(true).assertTrue();
+        } else {
+          expect().assertFail();
+        }
+      } catch (e) {
+        TestUtils.printError(e);
+        expect().assertFail();
+      }
+      done();
+    })
+
+    it('headBucket', 0, async (done: Function) => {
+      let request = new HeadBucketRequest(TestConst.PERSIST_BUCKET);
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).headBucket(request)
+        Logger.info(result)
+        if (result.httpCode && result.httpCode >= 200 && result.httpCode < 300) {
+          expect(true).assertTrue();
+        } else {
+          expect().assertFail();
+        }
+      } catch (e) {
+        TestUtils.printError(e);
+        expect().assertFail();
+      }
+      done();
+    })
+
+    it('mDeleteObject', 0, async (done: Function) => {
+      let request = new DeleteMultipleObjectRequest(TestConst.PERSIST_BUCKET);
+      let objects = new List<DeleteObject>();
+      objects.add(new DeleteObject("VID_20230718_164243.mp4"))
+      objects.add(new DeleteObject("VID_20231128_193409.mp4"));
+      request.objects = objects;
+      // request.quiet = true;
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).deleteMultipleObject(request)
+        Logger.info(result)
+        if (result.httpCode && result.httpCode >= 200 && result.httpCode < 300) {
+          expect(true).assertTrue();
+        } else {
+          expect().assertFail();
+        }
+      } catch (e) {
+        TestUtils.printError(e);
+        expect().assertFail();
+      }
+      done();
+    })
+
+    it('getBucketTag', 0, async (done: Function) => {
+      let request = new GetBucketTagRequest(TestConst.PERSIST_BUCKET);
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).getBucketTag(request)
+        Logger.info(result)
+        if (result.httpCode && result.httpCode >= 200 && result.httpCode < 300) {
+          expect(true).assertTrue();
+        } else {
+          expect().assertFail();
+        }
+      } catch (e) {
+        if (e instanceof CosError && (e as CosError).name === 'NoSuchTagSet') {
+          expect(true).assertTrue();
+        }else{
+          TestUtils.printError(e);
+          expect().assertFail();
+        }
+      }
+      done();
+    })
+
+
+    it('putBucketTag', 0, async (done: Function) => {
+
+      let tagSet = new List<TagObject>();
+      tagSet.add(new TagObject("name", "garenwang"))
+      tagSet.add(new TagObject("age", "18"))
+      let request = new PutBucketTagRequest(TestConst.PERSIST_BUCKET,tagSet);
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).putBucketTag(request)
+        Logger.info(result)
+        if (result.httpCode && result.httpCode >= 200 && result.httpCode < 300) {
+          expect(true).assertTrue();
+        } else {
+          expect().assertFail();
+        }
+      } catch (e) {
+        TestUtils.printError(e);
+        expect().assertFail();
+      }
+      done();
+    })
+
+    it('deleteBucketTag', 0, async (done: Function) => {
+
+      let request = new DeleteBucketTagRequest(TestConst.PERSIST_BUCKET);
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).deleteBucketTag(request)
+        Logger.info(result)
+        if (result.httpCode && result.httpCode >= 200 && result.httpCode < 300) {
+          expect(true).assertTrue();
+        } else {
+          expect().assertFail();
+        }
+      } catch (e) {
+        TestUtils.printError(e);
+        expect().assertFail();
+      }
+      done();
+    })
+
+    it('getObjectTag', 0, async (done: Function) => {
+      let request = new GetObjectTagRequest(TestConst.PERSIST_BUCKET,TestConst.PERSIST_BUCKET_PIC_PATH);
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).getObjectTag(request)
+        Logger.info(result)
+        if (result.httpCode && result.httpCode >= 200 && result.httpCode < 300) {
+          expect(true).assertTrue();
+        } else {
+          expect().assertFail();
+        }
+      } catch (e) {
+        TestUtils.printError(e);
+        expect().assertFail();
+      }
+      done();
+    })
+
+
+    it('putObjectTag', 0, async (done: Function) => {
+
+      let tagSet = new List<TagObject>();
+      tagSet.add(new TagObject("name", "garenwang"))
+      tagSet.add(new TagObject("age", "18"))
+      let request = new PutObjectTagRequest(TestConst.PERSIST_BUCKET,TestConst.PERSIST_BUCKET_PIC_PATH,tagSet);
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).putObjectTag(request)
+        Logger.info(result)
+        if (result.httpCode && result.httpCode >= 200 && result.httpCode < 300) {
+          expect(true).assertTrue();
+        } else {
+          expect().assertFail();
+        }
+      } catch (e) {
+        TestUtils.printError(e);
+        expect().assertFail();
+      }
+      done();
+    })
+
+    it('deleteObjectTag', 0, async (done: Function) => {
+
+      let request = new DeleteObjectTagRequest(TestConst.PERSIST_BUCKET,TestConst.PERSIST_BUCKET_PIC_PATH);
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).deleteObjectTag(request)
+        Logger.info(result)
+        if (result.httpCode && result.httpCode >= 200 && result.httpCode < 300) {
+          expect(true).assertTrue();
+        } else {
+          expect().assertFail();
+        }
+      } catch (e) {
+        TestUtils.printError(e);
+        expect().assertFail();
+      }
+      done();
+    })
+
+    it('getBucketObjectVersions', 0, async (done: Function) => {
+
+      let request = new GetBucketObjectVersionsRequest(TestConst.PERSIST_BUCKET);
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).getBucketObjectVersions(request)
+        Logger.info(result)
+        if (result.httpCode && result.httpCode >= 200 && result.httpCode < 300) {
+          expect(true).assertTrue();
+        } else {
+          expect().assertFail();
+        }
+      } catch (e) {
+        TestUtils.printError(e);
+        expect().assertFail();
+      }
+      done();
+    })
+
     // it('cdnDomain', 0, async (done: Function) => {
     //   // 存储桶region可以在COS控制台指定存储桶的概览页查看 https://console.cloud.tencent.com/cos5/bucket/ ，关于地域的详情见 https://cloud.tencent.com/document/product/436/6224
     //   let region = "ap-guangzhou"; // 您的存储桶地域

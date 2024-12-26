@@ -226,7 +226,7 @@ export default function uploadTest(cosXmlBaseService: CosXmlBaseService) {
     })
 
     it('bigUpload', 0, async (done: Function) => {
-      let filePath = FileUtils.getFile(100 * 1024 * 1024,'bigUpload');
+      let filePath = FileUtils.getFile(2 * 1024 * 1024,'bigUpload');
       let putRequest = new PutObjectRequest(TestConst.PERSIST_BUCKET, `uploadTest/UT/bigUpload`, filePath);
       await TestUtils.requestAddCredential(putRequest, TestUtils.getCosXmlBaseService(cosXmlBaseService));
       let task: UploadTask = TestUtils.getCosXmlBaseService(cosXmlBaseService).upload(

@@ -91,26 +91,19 @@ export default function commonTest(cosXmlBaseService: CosXmlBaseService) {
 
     it('ParseXml1', 0, async (done: Function) => {
       try {
-        let xml =  '<ListPartsResult>' +
-          '<Bucket>tinna-media-1253960454</Bucket>' +
-          '<EncodingType/>' +
-          '<Key>uploadTest/shaofu.mp4</Key>' +
-          '<UploadId>1718106898a6eabbe9890053332fee76f72ae0ee704a0e5af5ff49e47d328562e0b6b21946</UploadId>' +
-          '<Owner>' +
-          '<ID>1253960454</ID>' +
-          '<DisplayName>1253960454</DisplayName>' +
-          '</Owner>' +
-          '<PartNumberMarker>0</PartNumberMarker>' +
-          '<Initiator>' +
-          '<ID>qcs::cam::uin/2832742109:uin/2832742109</ID>' +
-          '<DisplayName>2832742109</DisplayName>' +
-          '</Initiator>' +
-          '<Part>' +
-          '<PartNumber>1</PartNumber>' +
-          '<LastModified>2024-06-11T11:55:01.000Z</LastModified>' +
-          '<ETag>&quot;3b452616f8974ababa69a0b27c38771b&quot;</ETag>' +
-          '<Size>1048576</Size>'
+        let xml =  '<Delete>\n' +
+          '    <Quiet>boolean</Quiet>\n' +
+          '    <Object>\n' +
+          '        <Key>string</Key>\n' +
+          '    </Object>\n' +
+          '    <Object>\n' +
+          '        <Key>string</Key>\n' +
+          '        <VersionId>string</VersionId>\n' +
+          '    </Object>\n' +
+          '</Delete>'
         let result = XmlUtils.xml2obj(xml)
+        let resultStr = XmlUtils.obj2xml(result as object);
+        console.log(resultStr);
       }catch (e){
         console.log(e);
       }
@@ -235,7 +228,7 @@ export default function commonTest(cosXmlBaseService: CosXmlBaseService) {
       done();
     })
     it('other', 0, async (done: Function) => {
-      CryptoUtil.qcloudMd5Str("asdasd");
+      CryptoUtil.qcloudMd5String("asdasd");
       XmlUtils.obj2xml([]);
       XmlUtils.obj2xml(new Object())
 
