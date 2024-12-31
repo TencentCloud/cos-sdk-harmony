@@ -393,7 +393,7 @@ export default function cosServiceTest(cosXmlBaseService: CosXmlBaseService) {
 
     it('objectList', 0, async (done: Function) => {
       let request = new ListObjectsRequest(TestConst.PERSIST_BUCKET);
-      // request.prefix = "big_gif"
+      request.prefix = ""
       await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
       try {
         let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).listObject(request)

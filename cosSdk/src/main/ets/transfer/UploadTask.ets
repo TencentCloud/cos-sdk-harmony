@@ -14,7 +14,7 @@ import {
   CompleteMultiUploadRequest
 } from '../model/object/CompleteMultiUploadRequest';
 import List from '@ohos.util.List';
-import { ContentType, HttpProgress, HttpHeader, QCloudUserCancelError } from '@tencentcloud/foundation';
+import { ContentType, HttpProgress, HttpHeader, QCloudUserCancelError, QCloudLogger } from '@tencentcloud/foundation';
 import { CosXmlRequest } from '../model/CosXmlRequest';
 import { CompleteMultipartUploadResult, CompleteMultiUploadResult } from '../model/object/CompleteMultiUploadResult';
 import { Callback } from '@ohos.base';
@@ -27,6 +27,7 @@ import { CosTransferPauseError } from '../error/CosTransferPauseError';
 import { CosErrorCode } from '../error/CosErrorCode';
 import { CosXmlResult } from '../model/CosXmlResult';
 import { PicOriginalInfo } from '../model/pic/PicOriginalInfo';
+import { JSON } from '@kit.ArkTS';
 
 /**
  * 上传任务
@@ -172,6 +173,7 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
 
     try {
       if (this.uploadId) {
+        QCloudLogger.info(`cancel upload,uploadId:${this.uploadId}`, 'UploadTask');
         let request = new AbortMultiUploadRequest(this.request.bucket!, this.request.cosPath, this.uploadId!);
         request.credential = this.request.credential;
         request.addHeaders(this.request.getHeaders());
@@ -189,6 +191,7 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
       this.cancelRequest();
     } catch (e) {
       this.onFail(this.request, e);
+      this.cancelRequest();
     }
   }
 
@@ -226,6 +229,7 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
   }
 
   private async simpleUpload() {
+    QCloudLogger.info(`begin simpleUpload,cosPath:${this.request.cosPath}`, 'UploadTask');
     let request: PutObjectRequest = new PutObjectRequest(this.request.bucket!, this.request.cosPath, this.request.body);
     request.credential = this.request.credential;
     request.addHeaders(this.request.getHeaders());
@@ -255,6 +259,7 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
   }
 
   private async resumeUpload(uploadId: string) {
+    QCloudLogger.info(`begin resumeUpload,uploadId:${uploadId} cosPath:${this.request.cosPath}}`, 'UploadTask');
     try {
       let result = await this.listParts(uploadId);
       if (this.initCallBack) {
@@ -262,11 +267,14 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
       }
       this.continueMultiUpload(result);
     } catch (e) {
-      this.initPartUpload();
+      this.onFail(this.request, e);
+      this.updateState(TransferState.Error);
+      this.cancelRequest();
     }
   }
 
   private async listParts(uploadId: string): Promise<ListPartsResult> {
+    QCloudLogger.info(`begin listParts,uploadId:${uploadId} cosPath:${this.request.cosPath}}`, 'UploadTask');
     let result: ListPartsResult = new ListPartsResult;
     let exitParts: List<ListPartsPart> = new List();
     do {
@@ -282,6 +290,7 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
       request.addNoSignQueryKeys(this.request.noSignQueryKeys);
       this.requestCacheArray.add(request);
       result = await this.cosXmlBaseService.listParts(request);
+      QCloudLogger.info(`get listParts,uploadId:${uploadId} cosPath:${this.request.cosPath}},partNumberMarker:${result?.listParts?.nextPartNumberMarker} result:${JSON.stringify(result)}`, 'UploadTask');
       if (result && result.listParts && result.listParts.part) {
         result.listParts.part.forEach((item) => {
           exitParts.add(item);
@@ -290,6 +299,7 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
     } while (result?.listParts?.isTruncated === true && result?.listParts?.nextPartNumberMarker &&
       result?.listParts?.nextPartNumberMarker?.length > 0)
     result.listParts?.setPart(exitParts);
+    QCloudLogger.info(`end listParts,uploadId:${uploadId} cosPath:${this.request.cosPath}},partCount:${result?.listParts?.part?.length}`, 'UploadTask');
     return result;
   }
 
@@ -362,6 +372,7 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
   }
 
   private async initPartUpload() {
+    QCloudLogger.info(`begin initPartUpload,cosPath:${this.request.getPath()}`, 'UploadTask');
     let request = new InitMultipartUploadRequest(this.request.bucket!, this.request.getPath());
     request.credential = this.request.credential;
     request.priority = QCloudPriority.High;
@@ -412,7 +423,7 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
       request.addNoSignHeaderKeys(this.request.noSignHeaderKeys);
       request.addNoSignQueryKeys(this.request.noSignQueryKeys);
       this.requestCacheArray.add(request);
-
+      QCloudLogger.info(`begin uploadPart,partNumber:${body.index + 1},uploadId:${this.uploadId}}`, 'UploadTask');
       request.onProgress = (progress) => {
         if (this.onProgress && (this.state != TransferState.Error && this.state != TransferState.Pause)) {
           stateSet.set(body.index.toString(), progress.complete);
@@ -425,6 +436,7 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
         }
       };
       request.onSuccess = (response) => {
+        QCloudLogger.info(`success uploadPart,partNumber:${body.index + 1},uploadId:${this.uploadId}}`, 'UploadTask');
         stateSet.delete(body.index.toString());
         this.uploadedSize += body.length;
         let headers = response!.headers;
@@ -440,6 +452,7 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
         this.requestCacheArray.remove(request);
       };
       request.onFailure = (err: Error) => {
+        QCloudLogger.info(`error uploadPart,partNumber:${body.index + 1},uploadId:${this.uploadId}}`, 'UploadTask');
         if (this.state != TransferState.Error && this.state != TransferState.Pause) {
           this.onFail(this.request, err);
           this.updateState(TransferState.Error);
@@ -475,11 +488,13 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
     request.completeMultipartUpload = completeInput;
 
     try {
+      QCloudLogger.info(`finishUpload,uploadId:${this.uploadId}}`, 'UploadTask');
       let result = await this.cosXmlBaseService.completeMultiUpload(request);
       this.onSuccess(this.request, this.buildCosXmlTaskResult(result));
       this.updateState(TransferState.Success);
       this.requestCacheArray.clear();
     } catch (e) {
+      QCloudLogger.info(`finishUpload error:${JSON.stringify(e)},uploadId:${this.uploadId}}`, 'UploadTask');
       this.onFail(this.request, e);
       this.updateState(TransferState.Error);
       this.cancelRequest();

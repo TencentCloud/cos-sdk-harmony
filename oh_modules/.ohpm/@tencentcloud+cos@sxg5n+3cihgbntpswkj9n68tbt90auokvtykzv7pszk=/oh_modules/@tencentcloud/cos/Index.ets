@@ -139,4 +139,5 @@ export { QCloudCredential,
   QCloudAuthenticationError,
   QCloudNetError,
   QCloudTaskError,
-  QCloudUserCancelError } from '@tencentcloud/foundation'
+  QCloudUserCancelError,
+  QCloudLogger } from '@tencentcloud/foundation'

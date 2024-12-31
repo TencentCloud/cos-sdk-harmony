@@ -1,6 +1,6 @@
 {
   "name": "@tencentcloud/cos",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "Tencent cloud cos sdk",
   "main": "Index.ets",
   "keywords": ["对象存储", "COS", "腾讯云"],
@@ -9,7 +9,7 @@
   "author": "Cos",
   "license": "Apache-2.0",
   "dependencies": {
-    "@tencentcloud/foundation": "file:./foundation112.har"
+    "@tencentcloud/foundation": "file:./foundation113.har"
 //    "@tencentcloud/foundation": "file:../foundation"
   }
 }

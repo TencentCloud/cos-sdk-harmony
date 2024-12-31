@@ -65,6 +65,7 @@ import { GetBucketTagResult } from './model/bucket/GetBucketTagResult';
 import { DeleteObjectTagResult } from './model/object/DeleteObjectTagResult';
 import { DeleteObjectTagRequest } from './model/object/DeleteObjectTagRequest';
 import { GetObjectTagRequest, GetObjectTagResult, PutBucketTagResult } from '../../../Index';
+import { JSON } from '@kit.ArkTS';
 
 /**
  * 提供用于访问Tencent Cloud COS服务的基础服务类。
@@ -267,7 +268,10 @@ export class CosXmlBaseService {
           if (cosXmlRequest.onSuccess) {
             cosXmlRequest.onSuccess(cosXmlResult);
           }
-          QCloudLogger.debug(`execute_onSuccess:${cosXmlRequest}`, 'CosXmlBaseService');
+          try {
+            QCloudLogger.debug(`execute_onSuccess:${JSON.stringify(cosXmlRequest)}`, 'CosXmlBaseService');  
+          } catch (e) {
+          }
           resolve(cosXmlResult);
         };
         task.onFailure = (err: Error) => {
@@ -275,7 +279,11 @@ export class CosXmlBaseService {
           if (cosXmlRequest.onFailure) {
             cosXmlRequest.onFailure(cosError);
           }
-          QCloudLogger.debug(`execute_onFailure:${cosError}`, 'CosXmlBaseService');
+          try {
+            QCloudLogger.debug(`execute_onFailure:${JSON.stringify(cosError)}`, 'CosXmlBaseService');  
+          } catch (e) {
+          }
+          
           reject(cosError);
         };
         // 根据request类型addTask
@@ -298,7 +306,10 @@ export class CosXmlBaseService {
         if (cosXmlRequest.onFailure) {
           cosXmlRequest.onFailure(cosError);
         }
-        QCloudLogger.debug(`execute_onFailure:${cosError}`, 'CosXmlBaseService');
+        try {
+          QCloudLogger.debug(`execute_onFailure:${JSON.stringify(cosError)}`, 'CosXmlBaseService');  
+        } catch (e) {
+        }
         reject(cosError);
       }
     });
