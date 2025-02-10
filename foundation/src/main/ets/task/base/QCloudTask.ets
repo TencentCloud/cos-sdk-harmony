@@ -30,7 +30,7 @@ export class QCloudTask {
   state = QCloudTaskState.Init;
   taskId:number;
   hTask?:taskpool.Task;
-  retry = RetryHandler.defaultHandler();
+  retry = new RetryHandler(3,1);
 
   constructor(mainFunc:Function) {
     this.mainFunc = mainFunc;

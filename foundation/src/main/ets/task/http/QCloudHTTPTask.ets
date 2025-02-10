@@ -85,6 +85,7 @@ export class QCloudHTTPTask<T> extends QCloudTask {
     }
 
     if (data.eventType == QCloudEventType.taskError) {
+      emitter.off(this.taskId);
       if (this.onFailure) {
         if(data.error instanceof QCloudAuthenticationError){
           // task执行过程中可能会抛QCloudAuthenticationError，需要单独抛出
@@ -97,6 +98,7 @@ export class QCloudHTTPTask<T> extends QCloudTask {
     }
 
     if (data.eventType == QCloudEventType.cancel) {
+      emitter.off(this.taskId);
       if (this.onFailure) {
         this.onFailure(new QCloudUserCancelError() as Error);
         return;
@@ -105,6 +107,7 @@ export class QCloudHTTPTask<T> extends QCloudTask {
 
     if (data.eventType == QCloudEventType.finish) {
       try {
+        emitter.off(this.taskId);
         QCloudLogger.info((data.result as number).toString(), this.TAG+"_httpCode");
         let t = this.httpRequest.responseBodyConverter.convertEnd(data.result as number);
         if (this.onSuccess) {
