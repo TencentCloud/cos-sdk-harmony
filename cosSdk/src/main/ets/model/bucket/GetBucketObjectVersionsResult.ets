@@ -73,55 +73,58 @@ export class ListVersionsResult {
 
   public static initWithJson(json: object): ListVersionsResult {
     let result = new ListVersionsResult();
-    result.encodingType = json['encodingType']
-    result.name = json['name']
-    result.prefix = json['prefix']
-    result.keyMarker = json['keyMarker']
-    result.versionIdMarker = json['versionIdMarker']
-    result.maxKeys = StringUtils.parseInt(json['maxKeys'])
-    result.isTruncated = StringUtils.parseBool(json['isTruncated'])
-    result.nextKeyMarker = json['nextKeyMarker']
-    result.nextVersionIdMarker = json['nextVersionIdMarker']
-    result.delimiter = json['delimiter']
+    if (json) {
 
-    let cPrefixes: object = json['commonPrefixes'];
-    let commonPrefixes = new List<CommonPrefixes>()
-    if (cPrefixes) {
-      if (Array.isArray(cPrefixes) || (cPrefixes instanceof List)) {
-        for (const item of cPrefixes as List<object>) {
-          commonPrefixes.add(CommonPrefixes.initWithJson(item));
-        }
-      } else {
-        commonPrefixes.add(CommonPrefixes.initWithJson(cPrefixes));
-      }
-    }
-    result.commonPrefixes = commonPrefixes;
+      result.encodingType = json['encodingType']
+      result.name = json['name']
+      result.prefix = json['prefix']
+      result.keyMarker = json['keyMarker']
+      result.versionIdMarker = json['versionIdMarker']
+      result.maxKeys = StringUtils.parseInt(json['maxKeys'])
+      result.isTruncated = StringUtils.parseBool(json['isTruncated'])
+      result.nextKeyMarker = json['nextKeyMarker']
+      result.nextVersionIdMarker = json['nextVersionIdMarker']
+      result.delimiter = json['delimiter']
 
-    let tVersion: object = json['version'];
-    let version = new List<Version>()
-    if (tVersion) {
-      if (Array.isArray(tVersion) || (tVersion instanceof List)) {
-        for (const item of tVersion as List<object>) {
-          version.add(Version.initWithJson(item));
+      let cPrefixes: object = json['commonPrefixes'];
+      let commonPrefixes = new List<CommonPrefixes>()
+      if (cPrefixes) {
+        if (Array.isArray(cPrefixes) || (cPrefixes instanceof List)) {
+          for (const item of cPrefixes as List<object>) {
+            commonPrefixes.add(CommonPrefixes.initWithJson(item));
+          }
+        } else {
+          commonPrefixes.add(CommonPrefixes.initWithJson(cPrefixes));
         }
-      } else {
-        version.add(Version.initWithJson(cPrefixes));
       }
-    }
-    result.version = version;
+      result.commonPrefixes = commonPrefixes;
 
-    let tDeleteMarker: object = json['deleteMarker'];
-    let deleteMarker = new List<DeleteMarker>()
-    if (tDeleteMarker) {
-      if (Array.isArray(tDeleteMarker) || (tDeleteMarker instanceof List)) {
-        for (const item of tDeleteMarker as List<object>) {
-          deleteMarker.add(DeleteMarker.initWithJson(item));
+      let tVersion: object = json['version'];
+      let version = new List<Version>()
+      if (tVersion) {
+        if (Array.isArray(tVersion) || (tVersion instanceof List)) {
+          for (const item of tVersion as List<object>) {
+            version.add(Version.initWithJson(item));
+          }
+        } else {
+          version.add(Version.initWithJson(cPrefixes));
         }
-      } else {
-        deleteMarker.add(DeleteMarker.initWithJson(tDeleteMarker));
       }
+      result.version = version;
+
+      let tDeleteMarker: object = json['deleteMarker'];
+      let deleteMarker = new List<DeleteMarker>()
+      if (tDeleteMarker) {
+        if (Array.isArray(tDeleteMarker) || (tDeleteMarker instanceof List)) {
+          for (const item of tDeleteMarker as List<object>) {
+            deleteMarker.add(DeleteMarker.initWithJson(item));
+          }
+        } else {
+          deleteMarker.add(DeleteMarker.initWithJson(tDeleteMarker));
+        }
+      }
+      result.deleteMarker = deleteMarker;
     }
-    result.deleteMarker = deleteMarker;
     return result;
   }
 }
@@ -170,16 +173,18 @@ export class Version {
 
   public static initWithJson(json: object): Version {
     let result = new Version();
-    result.key = json['key'];
-    result.versionId = json['versionId'];
-    result.isLatest = StringUtils.parseBool(json['isLatest']);
-    result.lastModified = json['lastModified'];
-    result.eTag = json['eTag'];
-    result.size = StringUtils.parseInt(json['size']);
-    result.storageClass = json['storageClass'];
-    result.storageTier = json['storageTier'];
-    if (json['owner']) {
-      result.owner = Owner.initWithJson(json['owner']);
+    if (json) {
+      result.key = json['key'];
+      result.versionId = json['versionId'];
+      result.isLatest = StringUtils.parseBool(json['isLatest']);
+      result.lastModified = json['lastModified'];
+      result.eTag = json['eTag'];
+      result.size = StringUtils.parseInt(json['size']);
+      result.storageClass = json['storageClass'];
+      result.storageTier = json['storageTier'];
+      if (json['owner']) {
+        result.owner = Owner.initWithJson(json['owner']);
+      }
     }
     return result;
   }
@@ -209,12 +214,14 @@ export class DeleteMarker {
 
   public static initWithJson(json: object): DeleteMarker {
     let result = new DeleteMarker();
-    result.key = json['key'];
-    result.versionId = json['versionId'];
-    result.isLatest = StringUtils.parseBool(json['isLatest']);
-    result.lastModified = json['lastModified'];
-    if (json['owner']) {
-      result.owner = Owner.initWithJson(json['owner']);
+    if (json) {
+      result.key = json['key'];
+      result.versionId = json['versionId'];
+      result.isLatest = StringUtils.parseBool(json['isLatest']);
+      result.lastModified = json['lastModified'];
+      if (json['owner']) {
+        result.owner = Owner.initWithJson(json['owner']);
+      }
     }
     return result;
   }

@@ -37,7 +37,7 @@ export class XmlUtils {
 
       let view: Uint8Array = new Uint8Array(arrayBuffer); // 使用Uint8Array读取arrayBuffer的数据
       let textDecoder: util.TextDecoder = util.TextDecoder.create(); // 调用util模块的TextDecoder类
-      let res: string = textDecoder.decodeToString(view).trim(); // 对view解码
+      let res: string = textDecoder.decodeWithStream(view, { stream: false }).trim(); // 对view解码
       return res
     } catch (e) {
       return null
@@ -117,7 +117,7 @@ export class XmlUtils {
         let _name: string = _element['_name'];
         if (!_name) {
           let value = XmlUtils.getElementValue(_element, obj, false, lCamel);
-          if (typeof value == 'string' && value === 'null'){
+          if (typeof value == 'string' && value === 'null') {
             value = null;
           }
           if (!root) {

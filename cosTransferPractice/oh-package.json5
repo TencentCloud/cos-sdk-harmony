@@ -7,8 +7,8 @@
   "license": "",
   "dependencies": {
     //    "@tencentcloud/cos": "file:../cosSdk"
-      "@tencentcloud/cos": "file:./cosSdk-1.1.4.har"
-//    "@tencentcloud/cos": "^1.1.4"
+      "@tencentcloud/cos": "file:./cosSdk-1.1.5.har"
+//    "@tencentcloud/cos": "^1.1.5"
   },
   "devDependencies": {},
   "dynamicDependencies": {}

@@ -13,7 +13,7 @@ export class CompleteMultiUploadResult extends CosXmlResult {
     super.contentParser(arrayBuffer);
     if (arrayBuffer) {
       let result = XmlUtils.xml2obj(StringUtils.arrayBuffer2String(arrayBuffer),true);
-      if (result) {
+      if (result && result["completeMultipartUploadResult"]) {
         this.result = CompleteMultipartUploadResult.initWithJson(result["completeMultipartUploadResult"]);
       }
     }
@@ -42,26 +42,27 @@ export class CompleteMultipartUploadResult{
 
   public static initWithJson(json:object):CompleteMultipartUploadResult{
     let result = new CompleteMultipartUploadResult();
+    if (json) {
+      result.key = json['key'];
+      result.location = json['location'];
+      result.eTag = json['eTag'];
 
-    result.key = json['key'];
-    result.location = json['location'];
-    result.eTag = json['eTag'];
-
-    if (json['imageInfo']) {
-      result.imageInfo = ImageInfo.initWithJson(json['imageInfo']);
-    }
-    if (json['processResults']) {
-      let processResults : List<PicObject> = new List();
-      if (Array.isArray(json['processResults']) || json['processResults'] instanceof List) {
-        for (const item of json['processResults'] as List<object>) {
-          let item1 = PicObject.initWithJson(item);
-          processResults.add(item1);
-        }
-      }else{
-        let picObj = PicObject.initWithJson(json['processResults']);
-        processResults.add(picObj)
+      if (json['imageInfo']) {
+        result.imageInfo = ImageInfo.initWithJson(json['imageInfo']);
       }
-      result.processResults = processResults;
+      if (json['processResults']) {
+        let processResults : List<PicObject> = new List();
+        if (Array.isArray(json['processResults']) || json['processResults'] instanceof List) {
+          for (const item of json['processResults'] as List<object>) {
+            let item1 = PicObject.initWithJson(item);
+            processResults.add(item1);
+          }
+        }else{
+          let picObj = PicObject.initWithJson(json['processResults']);
+          processResults.add(picObj)
+        }
+        result.processResults = processResults;
+      }
     }
     return result;
   }

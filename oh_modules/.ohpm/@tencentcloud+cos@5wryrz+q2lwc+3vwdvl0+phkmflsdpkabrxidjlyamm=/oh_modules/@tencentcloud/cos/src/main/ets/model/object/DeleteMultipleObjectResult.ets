@@ -28,36 +28,36 @@ export class DeleteMultipleObject {
 
   public static initWithJson(json: object): DeleteMultipleObject {
     let result = new DeleteMultipleObject();
+    if (json) {
+      let deleted: object = json['deleted'];
+      let error: object = json['error'];
 
-    let deleted: object = json['deleted'];
-    let error: object = json['error'];
+      let deletedResult = new List<DeletedResult>();
+      let errorResult = new List<ErrorResult>();
 
-    let deletedResult = new List<DeletedResult>();
-    let errorResult = new List<ErrorResult>();
-
-    if (deleted) {
-      if (Array.isArray(deleted) || (deleted instanceof List)) {
-        for (const item of deleted as List<object>) {
-          deletedResult.add(DeletedResult.initWithJson(item));
+      if (deleted) {
+        if (Array.isArray(deleted) || (deleted instanceof List)) {
+          for (const item of deleted as List<object>) {
+            deletedResult.add(DeletedResult.initWithJson(item));
+          }
+        } else {
+          deletedResult.add(DeletedResult.initWithJson(deleted));
         }
-      } else {
-        deletedResult.add(DeletedResult.initWithJson(deleted));
       }
-    }
 
-    if (error) {
-      if (Array.isArray(error) || (error instanceof List)) {
-        for (const item of error as List<object>) {
-          errorResult.add(ErrorResult.initWithJson(item));
+      if (error) {
+        if (Array.isArray(error) || (error instanceof List)) {
+          for (const item of error as List<object>) {
+            errorResult.add(ErrorResult.initWithJson(item));
+          }
+        } else {
+          errorResult.add(ErrorResult.initWithJson(error));
         }
-      } else {
-        errorResult.add(ErrorResult.initWithJson(error));
       }
+
+      result.deleted = deletedResult;
+      result.error = errorResult;
     }
-
-    result.deleted = deletedResult;
-    result.error = errorResult;
-
     return result;
   }
 }
@@ -82,14 +82,16 @@ export class DeletedResult {
 
   public static initWithJson(json: object): DeletedResult {
     let result = new DeletedResult();
-    result.key = json['key'];
-    result.deleteMarker = StringUtils.parseBool(json['deleteMarker']);
-    if (json['deleteMarkerVersionId'] !== 'null') {
-      result.deleteMarkerVersionId = json['deleteMarkerVersionId'];
-    }else{
-      result.deleteMarkerVersionId = undefined;
+    if (json) {
+      result.key = json['key'];
+      result.deleteMarker = StringUtils.parseBool(json['deleteMarker']);
+      if (json['deleteMarkerVersionId'] !== 'null') {
+        result.deleteMarkerVersionId = json['deleteMarkerVersionId'];
+      }else{
+        result.deleteMarkerVersionId = undefined;
+      }
+      result.versionId = json['versionId'];
     }
-    result.versionId = json['versionId'];
     return result;
   }
 }
@@ -114,10 +116,12 @@ export class ErrorResult {
 
   public static initWithJson(json: object): ErrorResult {
     let result = new ErrorResult();
-    result.key = json['key'];
-    result.versionId = json['versionId'];
-    result.code = json['code'];
-    result.message = json['message'];
+    if (json) {
+      result.key = json['key'];
+      result.versionId = json['versionId'];
+      result.code = json['code'];
+      result.message = json['message'];
+    }
     return result;
   }
 }

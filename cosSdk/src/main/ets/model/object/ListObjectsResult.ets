@@ -179,8 +179,17 @@ export class Content{
   }
 
   public static initWithJson(json:object):Content{
-    let owner = Owner.initWithJson(json['owner']);
-    let result = new Content(json['key'], json['lastModified'], json['eTag'],json['size'],owner,json['storageTier'],json['restoreStatus']);
+    let result = new Content();
+    if (json) {
+      let owner = Owner.initWithJson(json['owner']);
+      result.key = json['key'];
+      result.lastModified = json['lastModified'];
+      result.eTag = json['eTag'];
+      result.size = json['size'];
+      result.owner = owner;
+      result.storageTier = json['storageTier'];
+      result.restoreStatus = json['restoreStatus'];
+    }
     return result;
   }
 }
@@ -191,8 +200,10 @@ export class Owner {
 
   public static initWithJson(json: object): Owner {
     let result = new Owner();
-    result.id = json['iD'];
-    result.displayName = json['displayName'];
+    if (json) {
+      result.id = json['iD'];
+      result.displayName = json['displayName'];
+    }
     return result;
   }
 }

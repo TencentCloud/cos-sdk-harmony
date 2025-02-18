@@ -42,32 +42,32 @@ export class ListBuckets {
   public static initWithJson(json: object): ListBuckets {
 
     let result = new ListBuckets();
-
-    let owner = Owner.initWithJson(json['owner']);
-    ;
-    let buckets: object = json['buckets'];
-    if (buckets['bucket']) {
-      buckets = buckets['bucket'];
-    }
-    let isTruncated: boolean = StringUtils.parseBool(json['isTruncated']);
-    let marker: string = json['marker'];
-    let nextMarker: string = json['nextMarker'];
-    let listBuckets = new List<Bucket>();
-
-    if (buckets) {
-      if (Array.isArray(buckets) || (buckets instanceof List)) {
-        for (const item of buckets as List<object>) {
-          listBuckets.add(Bucket.initWithJson(item));
-        }
-      } else {
-        listBuckets.add(Bucket.initWithJson(buckets));
+    if (json) {
+      let owner = Owner.initWithJson(json['owner']);
+      let buckets: object = json['buckets'];
+      if (buckets['bucket']) {
+        buckets = buckets['bucket'];
       }
+      let isTruncated: boolean = StringUtils.parseBool(json['isTruncated']);
+      let marker: string = json['marker'];
+      let nextMarker: string = json['nextMarker'];
+      let listBuckets = new List<Bucket>();
+
+      if (buckets) {
+        if (Array.isArray(buckets) || (buckets instanceof List)) {
+          for (const item of buckets as List<object>) {
+            listBuckets.add(Bucket.initWithJson(item));
+          }
+        } else {
+          listBuckets.add(Bucket.initWithJson(buckets));
+        }
+      }
+      result.buckets = listBuckets;
+      result.owner = owner;
+      result.marker = marker;
+      result.isTruncated = isTruncated;
+      result.nextMarker = nextMarker;
     }
-    result.buckets = listBuckets;
-    result.owner = owner;
-    result.marker = marker;
-    result.isTruncated = isTruncated;
-    result.nextMarker = nextMarker;
     return result;
   }
 }
@@ -80,10 +80,12 @@ export class Bucket {
 
   public static initWithJson(json: object): Bucket {
     let result = new Bucket();
-    result.name = json['name'];
-    result.location = json['location'];
-    result.creationDate = json['creationDate'];
-    result.bucketType = json['bucketType'];
+    if (json) {
+      result.name = json['name'];
+      result.location = json['location'];
+      result.creationDate = json['creationDate'];
+      result.bucketType = json['bucketType'];
+    }
     return result;
   }
 }

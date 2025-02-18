@@ -24,22 +24,24 @@ export class TaggingResult {
 
   static initWithJson(json: object): TaggingResult {
     let result = new TaggingResult();
-    let tTagSet: object = json['tagSet'];
-    if (tTagSet) {
-      tTagSet = tTagSet['tag'];
-    }
-    let tagSet = new List<TagResult>();
-
-    if (tTagSet) {
-      if (Array.isArray(tTagSet) || (tTagSet instanceof List)) {
-        for (const item of tTagSet as List<object>) {
-          tagSet.add(TagResult.initWithJson(item));
-        }
-      } else {
-        tagSet.add(TagResult.initWithJson(tTagSet));
+    if (json) {
+      let tTagSet: object = json['tagSet'];
+      if (tTagSet) {
+        tTagSet = tTagSet['tag'];
       }
+      let tagSet = new List<TagResult>();
+
+      if (tTagSet) {
+        if (Array.isArray(tTagSet) || (tTagSet instanceof List)) {
+          for (const item of tTagSet as List<object>) {
+            tagSet.add(TagResult.initWithJson(item));
+          }
+        } else {
+          tagSet.add(TagResult.initWithJson(tTagSet));
+        }
+      }
+      result.tagSet = tagSet;
     }
-    result.tagSet = tagSet;
     return result;
   }
 }
@@ -56,8 +58,10 @@ export class TagResult {
 
   static initWithJson(json: object): TagResult {
     let result = new TagResult();
-    result.key = json['key'];
-    result.value = json['value'];
+    if (json) {
+      result.key = json['key'];
+      result.value = json['value'];
+    }
     return result;
   }
 }

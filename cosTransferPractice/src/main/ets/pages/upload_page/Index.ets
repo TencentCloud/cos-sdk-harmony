@@ -191,6 +191,7 @@ export struct UploadPage {
                 this.currentTask?.cancel();
                 this.currentTask = undefined;
                 this.pause = true;
+                this.uploadId = undefined;
               })
               .backgroundColor(0x317aff)
               .width(80)

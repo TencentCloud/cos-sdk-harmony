@@ -8,12 +8,14 @@ export class PicOriginalInfo {
 
   public static initWithJson(json:object):PicOriginalInfo{
     let result = new PicOriginalInfo();
-    if (json['imageInfo']) {
-      result.imageInfo = ImageInfo.initWithJson(json['imageInfo'])
+    if (json){
+      if (json['imageInfo']) {
+        result.imageInfo = ImageInfo.initWithJson(json['imageInfo'])
+      }
+      result.key = json['key'];
+      result.location = json['location'];
+      result.eTag = json['eTag'];
     }
-    result.key = json['key'];
-    result.location = json['location'];
-    result.eTag = json['eTag'];
     return result;
   }
 }
