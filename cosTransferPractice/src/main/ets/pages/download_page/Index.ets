@@ -1,4 +1,4 @@
-import { CosXmlBaseService, DownloadTask, GetObjectRequest, HttpProgress } from '@tencentcloud/cos';
+import { CosXmlBaseService, DownloadTask, GetObjectRequest, HttpProgress, CosXmlDownloadTaskResult, CosError } from '@tencentcloud/cos';
 import { Const } from '../../Const';
 import { CRC64 } from '../../utils/CRC64';
 import { Logger } from '../../utils/Logger';
@@ -33,7 +33,7 @@ export struct DownloadPage {
         this.value = progress.complete;
       };
       task.onResult = {
-        onSuccess:async (request, result)=>{
+        onSuccess:async (request, result: CosXmlDownloadTaskResult)=>{
           this.currentTask = undefined;
 
           // crc64计算比较慢，大文件不太适合
@@ -55,7 +55,7 @@ export struct DownloadPage {
           this.result = '下载成功\n' + '下载平均速度：' + sizeFormat(this.total/((finish - now) || 1)) + '/S\n' + 'result\n' +  JSON.stringify(result,null,2) + '\n';
           this.pause = true;
         },
-        onFail:(request, error)=>{
+        onFail:(request, error: CosError)=>{
           this.result = `下载失败:
         ${printError(error)}`;
         }

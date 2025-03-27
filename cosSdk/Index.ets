@@ -12,9 +12,9 @@ export { CosXmlResult } from './src/main/ets/model/CosXmlResult'
 
 export { TransferConfig } from './src/main/ets/transfer/TransferConfig'
 
-export { UploadTask } from './src/main/ets/transfer/UploadTask'
+export { UploadTask, CosXmlUploadTaskResult } from './src/main/ets/transfer/UploadTask'
 
-export { DownloadTask } from './src/main/ets/transfer/DownloadTask'
+export { DownloadTask, CosXmlDownloadTaskResult } from './src/main/ets/transfer/DownloadTask'
 
 export { COSStorageClass } from './src/main/ets/common/Constants'
 

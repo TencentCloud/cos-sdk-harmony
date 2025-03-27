@@ -1,4 +1,5 @@
 import { LinkedList, taskpool } from '@kit.ArkTS'
+import { QCloudUserCancelError } from '../../error/QCloudUserCancelError';
 import { QCloudLogger } from '../../logger/QCloudLogger';
 import { QCloudEventType, QCloudPriority, QCloudTask, QCloudTaskState } from '../base/QCloudTask'
 import { QCloudTransferData } from '../base/QCloudTransferData';
@@ -84,6 +85,7 @@ export  class QCloudQueue {
       let task = this.runingTaskQueue.get(i);
       if (task.taskId == taskId) {
         task.cancel();
+        task.state = QCloudTaskState.Cancel;
         return;
       }
     }
@@ -127,11 +129,15 @@ export  class QCloudQueue {
       }
       try {
         let hTask = new taskpool.Task(TaskHTTPExecuteFunc,task.getRequestData());
-        // task.hTask = hTask;
-        taskpool.execute(hTask);
-        QCloudLogger.log(`startTask:${task.taskId}`,'cos_sdk_task_manager_log');
-        this._logState();
-        task.state = QCloudTaskState.Process;
+        if (task.state === QCloudTaskState.Cancel) {
+          task.onTaskReceiveData(new QCloudTransferData(QCloudEventType.cancel,null,null))
+          this.runingTaskQueue.remove(task);
+        }else{
+          taskpool.execute(hTask);
+          QCloudLogger.log(`startTask:${task.taskId}`,'cos_sdk_task_manager_log');
+          this._logState();
+          task.state = QCloudTaskState.Process;
+        }
       } catch (e) {
         this.taskReceiveData(task.taskId,new QCloudTransferData(QCloudEventType.taskError,null,e));
       }

@@ -6,9 +6,9 @@
   "author": "",
   "license": "",
   "dependencies": {
-    //    "@tencentcloud/cos": "file:../cosSdk"
-      "@tencentcloud/cos": "file:./cosSdk-1.1.5.har"
-//    "@tencentcloud/cos": "^1.1.5"
+//        "@tencentcloud/cos": "file:../cosSdk"
+//      "@tencentcloud/cos": "file:./cosSdk-1.1.6.har"
+    "@tencentcloud/cos": "^1.1.6"
   },
   "devDependencies": {},
   "dynamicDependencies": {}

@@ -1,6 +1,6 @@
 import { BusinessError } from '@ohos.base';
 import picker from '@ohos.file.picker';
-import { CosXmlBaseService, HttpProgress, PutObjectRequest, UploadTask } from '@tencentcloud/cos';
+import { CosXmlBaseService, HttpProgress, PutObjectRequest, UploadTask, CosXmlUploadTaskResult, CosError } from '@tencentcloud/cos';
 import { Const } from '../../Const';
 import { sizeFormat } from '../../utils/Utils';
 
@@ -96,7 +96,7 @@ export struct UploadPage {
       this.value = progress.complete;
     };
     task.onResult = {
-      onSuccess:(request, result)=>{
+      onSuccess:(request, result: CosXmlUploadTaskResult)=>{
         this.uploadId = undefined;
         this.currentTask = undefined;
         this.result = '上传成功\n' + 'result\n' +  JSON.stringify(result,null,2) + '\n';
@@ -104,7 +104,7 @@ export struct UploadPage {
         this.result += '上传平均速度：' + sizeFormat(this.total/((finish - now) || 1)) + '/S'
         this.pause = true;
       },
-      onFail:(request, error)=>{
+      onFail:(request, error: CosError)=>{
         this.result = '上传失败\n' + 'error\n' +  error.message;
       }
     }
