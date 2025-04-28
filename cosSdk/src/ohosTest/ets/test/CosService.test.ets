@@ -331,15 +331,22 @@ export default function cosServiceTest(cosXmlBaseService: CosXmlBaseService) {
               if (!err) {
                 Logger.info(data, "QCloudCredentials_Response")
 
-                const stsSessionQCloudCredentials: StsSessionQCloudCredentials = JSON.parse(data.result.toString());
-                let credential: QCloudCredential = new QCloudCredential();
-                credential.secretID = stsSessionQCloudCredentials.credentials.tmpSecretId;
-                credential.secretKey = stsSessionQCloudCredentials.credentials.tmpSecretKey;
-                credential.token = stsSessionQCloudCredentials.credentials.sessionToken;
-                credential.startDate = new Date(stsSessionQCloudCredentials.startTime * 1000);
-                credential.expirationDate = new Date(stsSessionQCloudCredentials.expiredTime * 1000);
-                httpRequest.destroy();
-                resolve(credential)
+                try {
+                  const stsSessionQCloudCredentials: StsSessionQCloudCredentials = JSON.parse(data.result.toString());
+                  let credential: QCloudCredential = new QCloudCredential();
+                  credential.secretID = stsSessionQCloudCredentials.credentials.tmpSecretId;
+                  credential.secretKey = stsSessionQCloudCredentials.credentials.tmpSecretKey;
+                  credential.token = stsSessionQCloudCredentials.credentials.sessionToken;
+                  credential.startDate = new Date(stsSessionQCloudCredentials.startTime * 1000);
+                  credential.expirationDate = new Date(stsSessionQCloudCredentials.expiredTime * 1000);
+                  httpRequest.destroy();
+                  resolve(credential)
+                } catch (e) {
+                  Logger.info(`临时秘钥获取失败：`)
+                  Logger.error(e)
+                  httpRequest.destroy();
+                  reject(e)
+                }
               } else {
                 Logger.info(`临时秘钥获取失败：`)
                 Logger.error(err)

@@ -13,7 +13,12 @@ import List from '@ohos.util.List';
  */
 export class DeleteBucketTagRequest extends CosXmlRequest {
   public getPath(cosXmlServiceConfig: CosXmlServiceConfig): string {
-    return '?tagging';
+    return '';
+  }
+
+  public getQueries(): Map<string, string|undefined>{
+    this.addQuery("tagging", undefined);
+    return this.queries;
   }
 
   constructor(bucket: string) {

@@ -22,7 +22,12 @@ export class PutBucketTagRequest extends CosXmlRequest {
   tagSet: List<TagObject>;
 
   public getPath(cosXmlServiceConfig: CosXmlServiceConfig): string {
-    return '?tagging';
+    return '';
+  }
+
+  public getQueries(): Map<string, string|undefined>{
+    this.addQuery("tagging", undefined);
+    return this.queries;
   }
 
   constructor(bucket: string, tagSet: List<TagObject>) {

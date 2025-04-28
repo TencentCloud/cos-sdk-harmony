@@ -20,7 +20,7 @@ function getSignParams(headers:Map<string,string|undefined>,noSign:Set<string>,i
   for (const item of headers.keys()) {
     let key = item.toLowerCase();
     if (isHeader){
-      if (!lowerCaseNoSign.has(key) && !key.includes('x-cos-')) {
+      if (!lowerCaseNoSign.has(key)) {
         tempHeaders.set(item,headers.get(item)!);
       }
     }else{

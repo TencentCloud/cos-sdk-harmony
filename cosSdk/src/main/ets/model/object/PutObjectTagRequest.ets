@@ -25,14 +25,14 @@ export class PutObjectTagRequest extends ObjectRequest {
   versionId?: string;
 
   constructor(bucket: string, objectKey: string, tagSet?: List<TagObject>, versionId?: string) {
-    super(bucket, objectKey + "?tagging");
+    super(bucket, objectKey);
     this.tagSet = tagSet;
     this.versionId = versionId;
     this.isNeedMD5 = true;
   }
 
   public getQueries(): Map<string, string | undefined> {
-
+    this.addQuery('tagging', undefined);
     if (this.versionId) {
       this.addQuery('VersionId', this.versionId);
     }

@@ -18,12 +18,12 @@ export class DeleteObjectTagRequest extends ObjectRequest {
   versionId?: string;
 
   constructor(bucket: string, objectKey: string, versionId?: string) {
-    super(bucket, objectKey + "?tagging");
+    super(bucket, objectKey);
     this.versionId = versionId;
   }
 
   public getQueries(): Map<string, string | undefined> {
-
+    this.addQuery('tagging', undefined);
     if (this.versionId) {
       this.addQuery('VersionId', this.versionId);
     }

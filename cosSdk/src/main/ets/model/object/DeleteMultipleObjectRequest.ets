@@ -32,9 +32,9 @@ export class DeleteMultipleObjectRequest extends ObjectRequest {
     this.isNeedMD5 = true;
   }
 
-  public getPath(): string {
-    let path = super.getPath();
-    return path + '?delete';
+  public getQueries(): Map<string, string|undefined>{
+    this.addQuery("delete", undefined);
+    return this.queries;
   }
 
   public getBodySerializer(): RequestBodySerializer | undefined {

@@ -40,7 +40,7 @@ export class GetBucketObjectVersionsRequest extends CosXmlRequest {
   maxKeys?: number;
 
   public getPath(cosXmlServiceConfig: CosXmlServiceConfig): string {
-    return '?versions';
+    return '';
   }
 
   constructor(bucket: string) {
@@ -49,7 +49,7 @@ export class GetBucketObjectVersionsRequest extends CosXmlRequest {
   }
 
   public getQueries(): Map<string, string | undefined> {
-
+    this.addQuery("versions", undefined);
     if (this.prefix) {
       this.addQuery('prefix', this.prefix);
     }
