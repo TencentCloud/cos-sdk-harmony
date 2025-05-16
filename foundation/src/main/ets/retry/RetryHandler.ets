@@ -16,6 +16,10 @@ export class RetryHandler{
     this.currentTryCount = 0;
   }
 
+  currentCount(){
+    return this.currentTryCount;
+  }
+
   shouldRetry():boolean{
     if (this.currentTryCount>=this.maxCount){
       return false;

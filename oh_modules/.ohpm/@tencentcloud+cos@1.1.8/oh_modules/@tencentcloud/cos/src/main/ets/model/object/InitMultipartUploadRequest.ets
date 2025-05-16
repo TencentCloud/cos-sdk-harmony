@@ -25,8 +25,8 @@ export class InitMultipartUploadRequest extends ObjectRequest {
     return this.headers;
   }
 
-  public getPath(): string {
-    let path = super.getPath();
-    return path + '?uploads';
+  public getQueries(): Map<string, string|undefined>{
+    this.addQuery("uploads", undefined);
+    return this.queries;
   }
 }

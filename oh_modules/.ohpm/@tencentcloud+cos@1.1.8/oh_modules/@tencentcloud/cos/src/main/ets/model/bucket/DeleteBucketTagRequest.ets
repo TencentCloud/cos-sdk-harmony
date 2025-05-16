@@ -1,4 +1,4 @@
-import { ObjectRequest } from './ObjectRequest';
+import { ObjectRequest } from '../object/ObjectRequest';
 import http from '@ohos.net.http';
 import { ContentType, RequestBodySerializer, XmlUtils } from '@tencentcloud/foundation';
 import { CosInvalidArgumentError } from '../../error/CosInvalidArgumentError';
@@ -11,23 +11,19 @@ import List from '@ohos.util.List';
  *
  * 请查看 https://cloud.tencent.com/document/product/436/34836
  */
-export class DeleteObjectTagRequest extends ObjectRequest {
-  /**
-   * 当启用版本控制时，指定要操作的对象版本 ID，如不指定则将添加标签到最新版本的对象。
-   */
-  versionId?: string;
-
-  constructor(bucket: string, objectKey: string, versionId?: string) {
-    super(bucket, objectKey + "?tagging");
-    this.versionId = versionId;
+export class DeleteBucketTagRequest extends CosXmlRequest {
+  public getPath(cosXmlServiceConfig: CosXmlServiceConfig): string {
+    return '';
   }
 
-  public getQueries(): Map<string, string | undefined> {
-
-    if (this.versionId) {
-      this.addQuery('VersionId', this.versionId);
-    }
+  public getQueries(): Map<string, string|undefined>{
+    this.addQuery("tagging", undefined);
     return this.queries;
+  }
+
+  constructor(bucket: string) {
+    super();
+    this.bucket = bucket;
   }
 
   public getBodySerializer(): RequestBodySerializer | undefined {

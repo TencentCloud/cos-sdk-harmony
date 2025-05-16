@@ -9,9 +9,9 @@ export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
     CosXmlBaseService.setDebuggable(true);
-    QCloudLogger.logOutputCallback = (log)=>{
-      console.log("logOutputCallback" + log);
-    }
+    // QCloudLogger.logOutputCallback = (log)=>{
+    //   console.log("logOutputCallback" + log);
+    // }
     if(Const.CREDENTIAL_TYPE === CredentialType.STS){
       // 临时密钥
       CosXmlBaseService.initDefaultService(

@@ -36,6 +36,9 @@ export class QCloudHTTPTask<T> extends QCloudTask {
 
   async buildRequestData():Promise<boolean>{
     await this.httpRequest.prepareRequestData();
+    if (this.retry.currentCount() > 0) {
+      this.httpRequest.addHeader("x-cos-sdk-retry","true");
+    }
     let url = this.httpRequest?.buildURL();
 
     // 请求如果已经签名则不再本地或者服务端签名

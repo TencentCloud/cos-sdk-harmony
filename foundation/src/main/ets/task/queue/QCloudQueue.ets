@@ -128,12 +128,11 @@ export  class QCloudQueue {
         return;
       }
       try {
-        let hTask = new taskpool.Task(TaskHTTPExecuteFunc,task.getRequestData());
+        TaskHTTPExecuteFunc(task.getRequestData())
         if (task.state === QCloudTaskState.Cancel) {
           task.onTaskReceiveData(new QCloudTransferData(QCloudEventType.cancel,null,null))
           this.runingTaskQueue.remove(task);
         }else{
-          taskpool.execute(hTask);
           QCloudLogger.log(`startTask:${task.taskId}`,'cos_sdk_task_manager_log');
           this._logState();
           task.state = QCloudTaskState.Process;

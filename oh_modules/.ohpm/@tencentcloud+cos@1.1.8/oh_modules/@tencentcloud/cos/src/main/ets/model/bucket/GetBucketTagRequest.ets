@@ -7,13 +7,18 @@ import { CosXmlServiceConfig } from '../../CosXmlServiceConfig';
 import List from '@ohos.util.List';
 
 /**
- * COS 支持为已存在的 Bucket 删除标签（Tag）。DELETE Bucket tagging 接口用于删除指定存储桶下已有的存储桶标签。
+ * COS 支持为已存在的存储桶查询标签（Tag）。GET Bucket tagging 接口用于查询指定存储桶下已有的存储桶标签。
  *
- * 请查看 https://cloud.tencent.com/document/product/436/34836
+ * 请查看 https://cloud.tencent.com/document/product/436/34837
  */
-export class DeleteBucketTagRequest extends CosXmlRequest {
+export class GetBucketTagRequest extends CosXmlRequest {
   public getPath(cosXmlServiceConfig: CosXmlServiceConfig): string {
-    return '?tagging';
+    return "";
+  }
+
+  public getQueries(): Map<string, string|undefined>{
+    this.addQuery("tagging", undefined);
+    return this.queries;
   }
 
   constructor(bucket: string) {
@@ -26,7 +31,7 @@ export class DeleteBucketTagRequest extends CosXmlRequest {
   }
 
   public getMethod(): http.RequestMethod {
-    return http.RequestMethod.DELETE;
+    return http.RequestMethod.GET;
   }
 }
 

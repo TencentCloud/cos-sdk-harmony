@@ -2,8 +2,8 @@
 	"app": {
 		"bundleName": "com.tencent.cloud.cos",
 		"debug": true,
-		"versionCode": 1010106,
-		"versionName": "1.1.6",
+		"versionCode": 1010108,
+		"versionName": "1.1.8",
 		"minAPIVersion": 50000012,
 		"targetAPIVersion": 50000012,
 		"apiReleaseType": "Release",

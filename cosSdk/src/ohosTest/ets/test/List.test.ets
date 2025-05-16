@@ -3,6 +3,7 @@ import commonTest from './Common.test';
 import { Credential } from './common/Credential';
 import { TestConst } from './common/TestConst';
 import { TestUtils } from './common/TestUtils';
+import cosRetryTest from './CosRetry.test';
 import cosServiceTest from './CosService.test';
 import downloadTest from './transfer/Download.test';
 import uploadTest from './transfer/Upload.test';
@@ -22,10 +23,12 @@ export default function testsuite() {
     new CosXmlServiceConfig(TestConst.PERSIST_BUCKET_REGION),
     Credential.constCredential
   )
+
   cosServiceTest(constCredentialService);
   uploadTest(constCredentialService);
   downloadTest(constCredentialService);
   commonTest(constCredentialService);
+  cosRetryTest();
 
   // 最终整体执行时再放开，不然单独执行某个case的时候也会执行两遍
   // 无秘钥的cos service

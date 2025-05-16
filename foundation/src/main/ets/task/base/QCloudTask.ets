@@ -47,7 +47,7 @@ export class QCloudTask {
     });
   }
 
-  getRequestData():object{
+  getRequestData():QCloudRequestData{
     return new QCloudRequestData();
   }
 

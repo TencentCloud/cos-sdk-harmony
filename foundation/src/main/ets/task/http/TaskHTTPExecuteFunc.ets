@@ -4,15 +4,24 @@ import emitter from '@ohos.events.emitter';
 import http from '@ohos.net.http';
 import { QCloudRequestData } from './QCloudRequestData';
 import { HttpProgress, ProgressController } from '../../net/HttpProgress';
-import { QCloudLogger } from '../../logger/QCloudLogger';
 import { HashMap } from '@kit.ArkTS';
 import { rcp } from '@kit.RemoteCommunicationKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 
-enum SendEventOrder {}
+export class QCloudSessionManager {
+  private static service: QCloudSessionManager;
 
-@Concurrent
-export function TaskHTTPExecuteFunc(qcloudRequestData: QCloudRequestData) {
+  public session :rcp.Session = rcp.createSession();
+
+  public static manager(): QCloudSessionManager {
+    if (!QCloudSessionManager.service) {
+      QCloudSessionManager.service = new QCloudSessionManager();
+    }
+    return QCloudSessionManager.service;
+  }
+}
+
+export async function TaskHTTPExecuteFunc(qcloudRequestData: QCloudRequestData) {
 
   let resultMap = new HashMap<number, object>();
   let sendSet = new Set<number>();
@@ -21,15 +30,6 @@ export function TaskHTTPExecuteFunc(qcloudRequestData: QCloudRequestData) {
     eventId: qcloudRequestData.taskId,
     priority: emitter.EventPriority.HIGH
   };
-
-  let cancelEvent: emitter.InnerEvent = {
-    eventId: qcloudRequestData.taskId + 1000000
-  };
-  emitter.once(cancelEvent, (eventData: emitter.EventData): void => {
-    session.cancel()
-    SendEvent(new QCloudTransferData(QCloudEventType.cancel, null, null))
-    dealloc();
-  });
 
   let SendEvent = (data: QCloudTransferData) => {
     let eventData: emitter.EventData = {
@@ -100,27 +100,27 @@ export function TaskHTTPExecuteFunc(qcloudRequestData: QCloudRequestData) {
     requestConfig!.tracing = tracingConfig;
   }
 
-  const session = rcp.createSession({
-    requestConfiguration: requestConfig
-  });
+  let req = new rcp.Request(qcloudRequestData.url!, qcloudRequestData.method,qcloudRequestData.headers,qcloudRequestData.content,undefined,undefined,requestConfig);
 
-  let req = new rcp.Request(qcloudRequestData.url!, qcloudRequestData.method);
-  req.headers = qcloudRequestData.headers;
-  if (qcloudRequestData?.content) {
-    req.content = qcloudRequestData.content
-  }
-
-  session.fetch(req).then((response) => {
+  QCloudSessionManager.manager().session.fetch(req).then((response) => {
     SendOrderEvent(new QCloudTransferData(QCloudEventType.finish, response.statusCode, null), 2, 3);
-    dealloc();
+    finish();
   }).catch((err: BusinessError) => {
     SendEvent(new QCloudTransferData(QCloudEventType.netError, null, err));
-    dealloc();
+    finish();
   });
 
-  let dealloc = () => {
+  let cancelEvent: emitter.InnerEvent = {
+    eventId: qcloudRequestData.taskId + 1000000
+  };
+  emitter.on(cancelEvent, (eventData: emitter.EventData): void => {
+    QCloudSessionManager.manager().session.cancel(req);
+    SendEvent(new QCloudTransferData(QCloudEventType.cancel, null, null))
+    finish();
+  });
+
+  let finish = () => {
     resultMap.clear();
     sendSet.clear();
-    session.close();
   }
 }

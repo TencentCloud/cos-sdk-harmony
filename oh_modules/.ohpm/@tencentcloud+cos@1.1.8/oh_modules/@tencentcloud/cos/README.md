@@ -16,7 +16,7 @@
    ``` bash
       "dependencies": {
          ...
-         "@tencentcloud/cos":"1.1.6"
+         "@tencentcloud/cos":"1.1.8"
       }
    ```
 2. SDK 需要网络权限，用于与 COS 服务器进行通信，请在应用模块下的 module.json5 中添加如下权限声明：

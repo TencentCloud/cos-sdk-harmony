@@ -192,8 +192,6 @@ export class DownloadTask extends TransferTask<GetObjectRequest, CosXmlDownloadT
     this.getObjectRequest.addNoSignQueryKeys(this.objectRequest.noSignQueryKeys);
     if (rangeEnd > 0 || rangeStart > 0) {
       this.getObjectRequest.setRange(rangeStart, rangeEnd);
-      //下载重试时会改变request的range，因此不能让range参与签名
-      this.getObjectRequest.addNoSignHeaderKey(HttpHeader.RANGE);
     }
     this.getObjectRequest.credential = this.objectRequest.credential;
     this.getObjectRequest.onProgress = (httpProgress: HttpProgress) => {
