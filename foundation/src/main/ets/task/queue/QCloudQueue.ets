@@ -3,6 +3,7 @@ import { QCloudUserCancelError } from '../../error/QCloudUserCancelError';
 import { QCloudLogger } from '../../logger/QCloudLogger';
 import { QCloudEventType, QCloudPriority, QCloudTask, QCloudTaskState } from '../base/QCloudTask'
 import { QCloudTransferData } from '../base/QCloudTransferData';
+import { QCloudHTTPTask } from '../http/QCloudHTTPTask';
 import { TaskHTTPExecuteFunc } from '../http/TaskHTTPExecuteFunc';
 import { QCloudTaskManager } from '../QCloudTaskManager';
 
@@ -151,15 +152,32 @@ export  class QCloudQueue {
     }
   }
 
+  private needRetry(data:QCloudTransferData,task:QCloudTask):boolean{
+    if (data.error && task.shouldRetry(data.error)){
+      return true;
+    }
+    if (data.eventType === QCloudEventType.netError && task.retry.shouldRetry()){
+      return true;
+    }
+    if (data.eventType === QCloudEventType.finish && (data.result as number) >= 500 && task.retry.shouldRetry()){
+      return true;
+    }
+    if (task instanceof QCloudHTTPTask){
+      if (data.eventType === QCloudEventType.finish && (data.result as number) >= 300 && (data.result as number) < 400 && task.httpResponse && task.httpResponse.headers && task.httpResponse.headers["x-cos-request-id"] === undefined && task.retry.shouldRetry()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public taskReceiveData(taskId:number,data:QCloudTransferData){
     let task = this.getRunningTask(taskId);
     if (!task) {
       return;
     }
-
-    if ((data.error && task.shouldRetry(data.error)) ||
-      ((data.eventType === QCloudEventType.netError || (data.eventType === QCloudEventType.finish && (data.result as number) >= 500)) && task.retry.shouldRetry())){
+    if (this.needRetry(data,task)){
       setTimeout(()=>{
+        task?.retry.retry();
         if (task) {
           this.runingTaskQueue.remove(task);
           task.reset();

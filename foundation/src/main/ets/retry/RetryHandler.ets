@@ -24,8 +24,11 @@ export class RetryHandler{
     if (this.currentTryCount>=this.maxCount){
       return false;
     }
-    this.currentTryCount ++;
     return true;
+  }
+
+  retry(){
+    this.currentTryCount ++;
   }
 
   copy():RetryHandler{

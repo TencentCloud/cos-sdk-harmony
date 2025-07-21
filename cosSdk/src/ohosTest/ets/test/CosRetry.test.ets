@@ -29,8 +29,8 @@ export default function cosRetryTest() {
       // Presets a clear action, which is performed after all test cases of the test suite end.
       // This API supports only one parameter: clear action function.
     })
-    it('getObject500', 0, async (done: Function) => {
-      let config = new CosXmlServiceConfig(TestConst.PERSIST_BUCKET_REGION);
+    it('500', 0, async (done: Function) => {
+      let config = new CosXmlServiceConfig(TestConst.RETRY_BUCKET_REGION);
       let cosXmlBaseService = new CosXmlBaseService(
         TestUtils.getContext(),
         config,
@@ -57,9 +57,8 @@ export default function cosRetryTest() {
       done();
     })
 
-    it('getObject500Noretry', 0, async (done: Function) => {
+    it('503', 0, async (done: Function) => {
       let config = new CosXmlServiceConfig(TestConst.RETRY_BUCKET_REGION);
-      config.maxRetryCount = 0;
       let cosXmlBaseService = new CosXmlBaseService(
         TestUtils.getContext(),
         config,
@@ -69,7 +68,295 @@ export default function cosRetryTest() {
       let context = TestUtils.getContext();
       let filesDir = context.filesDir;
       let request =
-        new GetObjectRequest(TestConst.RETRY_BUCKET, "500",  filesDir + '/500');
+        new GetObjectRequest(TestConst.RETRY_BUCKET, "503",  filesDir + '/503');
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).getObject(request)
+        Logger.info(result)
+        if (result.httpCode && result.httpCode >= 200 && result.httpCode <= 300) {
+          expect(true).assertTrue();
+        } else {
+          expect().assertFail();
+        }
+      } catch (e) {
+        TestUtils.printError(e);
+        expect().assertFail();
+      }
+      done();
+    })
+    it('504', 0, async (done: Function) => {
+      let config = new CosXmlServiceConfig(TestConst.RETRY_BUCKET_REGION);
+      let cosXmlBaseService = new CosXmlBaseService(
+        TestUtils.getContext(),
+        config,
+        Credential.constCredential
+      )
+
+      let context = TestUtils.getContext();
+      let filesDir = context.filesDir;
+      let request =
+        new GetObjectRequest(TestConst.RETRY_BUCKET, "504",  filesDir + '/504');
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).getObject(request)
+        Logger.info(result)
+        if (result.httpCode && result.httpCode >= 200 && result.httpCode <= 300) {
+          expect(true).assertTrue();
+        } else {
+          expect().assertFail();
+        }
+      } catch (e) {
+        TestUtils.printError(e);
+        expect().assertFail();
+      }
+      done();
+    })
+
+    it('404', 0, async (done: Function) => {
+      let config = new CosXmlServiceConfig(TestConst.RETRY_BUCKET_REGION);
+      let cosXmlBaseService = new CosXmlBaseService(
+        TestUtils.getContext(),
+        config,
+        Credential.constCredential
+      )
+
+      let context = TestUtils.getContext();
+      let filesDir = context.filesDir;
+      let request =
+        new GetObjectRequest(TestConst.RETRY_BUCKET, "404",  filesDir + '/404');
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).getObject(request)
+        expect(result.httpCode === 404).assertTrue();
+      } catch (e) {
+        TestUtils.printError(e);
+        expect(e!== undefined).assertTrue();
+      }
+      done();
+    })
+
+    it('403', 0, async (done: Function) => {
+      let config = new CosXmlServiceConfig(TestConst.RETRY_BUCKET_REGION);
+      let cosXmlBaseService = new CosXmlBaseService(
+        TestUtils.getContext(),
+        config,
+        Credential.constCredential
+      )
+
+      let context = TestUtils.getContext();
+      let filesDir = context.filesDir;
+      let request =
+        new GetObjectRequest(TestConst.RETRY_BUCKET, "403",  filesDir + '/403');
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).getObject(request)
+        expect(result.httpCode === 403).assertTrue();
+      } catch (e) {
+        TestUtils.printError(e);
+        expect(e!== undefined).assertTrue();
+      }
+      done();
+    })
+
+    it('400', 0, async (done: Function) => {
+      let config = new CosXmlServiceConfig(TestConst.RETRY_BUCKET_REGION);
+      let cosXmlBaseService = new CosXmlBaseService(
+        TestUtils.getContext(),
+        config,
+        Credential.constCredential
+      )
+
+      let context = TestUtils.getContext();
+      let filesDir = context.filesDir;
+      let request =
+        new GetObjectRequest(TestConst.RETRY_BUCKET, "400",  filesDir + '/400');
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).getObject(request)
+        expect(result.httpCode === 400).assertTrue();
+      } catch (e) {
+        TestUtils.printError(e);
+        expect(e!== undefined).assertTrue();
+      }
+      done();
+    })
+
+    it('301', 0, async (done: Function) => {
+      let config = new CosXmlServiceConfig(TestConst.RETRY_BUCKET_REGION);
+      let cosXmlBaseService = new CosXmlBaseService(
+        TestUtils.getContext(),
+        config,
+        Credential.constCredential
+      )
+
+      let context = TestUtils.getContext();
+      let filesDir = context.filesDir;
+      let request =
+        new GetObjectRequest(TestConst.RETRY_BUCKET, "301",  filesDir + '/301');
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).getObject(request)
+        if (result.httpCode && result.httpCode >= 200 && result.httpCode <= 300) {
+          expect(true).assertTrue();
+        } else {
+          expect().assertFail();
+        }
+      } catch (e) {
+        TestUtils.printError(e);
+        expect(e!== undefined).assertTrue();
+      }
+      done();
+    })
+
+    it('302', 0, async (done: Function) => {
+      let config = new CosXmlServiceConfig(TestConst.RETRY_BUCKET_REGION);
+      let cosXmlBaseService = new CosXmlBaseService(
+        TestUtils.getContext(),
+        config,
+        Credential.constCredential
+      )
+
+      let context = TestUtils.getContext();
+      let filesDir = context.filesDir;
+      let request =
+        new GetObjectRequest(TestConst.RETRY_BUCKET, "302",  filesDir + '/302');
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).getObject(request)
+        if (result.httpCode && result.httpCode >= 200 && result.httpCode <= 300) {
+          expect(true).assertTrue();
+        } else {
+          expect().assertFail();
+        }
+      } catch (e) {
+        TestUtils.printError(e);
+        expect(e!== undefined).assertTrue();
+      }
+      done();
+    })
+
+    it('200', 0, async (done: Function) => {
+      let config = new CosXmlServiceConfig(TestConst.RETRY_BUCKET_REGION);
+      let cosXmlBaseService = new CosXmlBaseService(
+        TestUtils.getContext(),
+        config,
+        Credential.constCredential
+      )
+
+      let context = TestUtils.getContext();
+      let filesDir = context.filesDir;
+      let request =
+        new GetObjectRequest(TestConst.RETRY_BUCKET, "200",  filesDir + '/200');
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).getObject(request)
+        if (result.httpCode && result.httpCode >= 200 && result.httpCode <= 300) {
+          expect(true).assertTrue();
+        } else {
+          expect().assertFail();
+        }
+      } catch (e) {
+        TestUtils.printError(e);
+        expect(e!== undefined).assertTrue();
+      }
+      done();
+    })
+
+    it('204', 0, async (done: Function) => {
+      let config = new CosXmlServiceConfig(TestConst.RETRY_BUCKET_REGION);
+      let cosXmlBaseService = new CosXmlBaseService(
+        TestUtils.getContext(),
+        config,
+        Credential.constCredential
+      )
+
+      let context = TestUtils.getContext();
+      let filesDir = context.filesDir;
+      let request =
+        new GetObjectRequest(TestConst.RETRY_BUCKET, "204",  filesDir + '/204');
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).getObject(request)
+        if (result.httpCode && result.httpCode >= 200 && result.httpCode <= 300) {
+          expect(true).assertTrue();
+        } else {
+          expect().assertFail();
+        }
+      } catch (e) {
+        TestUtils.printError(e);
+        expect(e!== undefined).assertTrue();
+      }
+      done();
+    })
+
+    it('206', 0, async (done: Function) => {
+      let config = new CosXmlServiceConfig(TestConst.RETRY_BUCKET_REGION);
+      let cosXmlBaseService = new CosXmlBaseService(
+        TestUtils.getContext(),
+        config,
+        Credential.constCredential
+      )
+
+      let context = TestUtils.getContext();
+      let filesDir = context.filesDir;
+      let request =
+        new GetObjectRequest(TestConst.RETRY_BUCKET, "206",  filesDir + '/206');
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).getObject(request)
+        if (result.httpCode && result.httpCode >= 200 && result.httpCode <= 300) {
+          expect(true).assertTrue();
+        } else {
+          expect().assertFail();
+        }
+      } catch (e) {
+        TestUtils.printError(e);
+        expect(e!== undefined).assertTrue();
+      }
+      done();
+    })
+
+
+    it('shutdown', 0, async (done: Function) => {
+      let config = new CosXmlServiceConfig(TestConst.RETRY_BUCKET_REGION);
+      let cosXmlBaseService = new CosXmlBaseService(
+        TestUtils.getContext(),
+        config,
+        Credential.constCredential
+      )
+
+      let context = TestUtils.getContext();
+      let filesDir = context.filesDir;
+      let request =
+        new GetObjectRequest(TestConst.RETRY_BUCKET, "shutdown",  filesDir + '/shutdown');
+      await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      try {
+        let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).getObject(request)
+        Logger.info(result)
+        if (result.httpCode && result.httpCode >= 200 && result.httpCode <= 300) {
+          expect(true).assertTrue();
+        } else {
+          expect().assertFail();
+        }
+      } catch (e) {
+        TestUtils.printError(e);
+        expect().assertFail();
+      }
+      done();
+    })
+
+    it('timeout', 0, async (done: Function) => {
+      let config = new CosXmlServiceConfig(TestConst.RETRY_BUCKET_REGION);
+      let cosXmlBaseService = new CosXmlBaseService(
+        TestUtils.getContext(),
+        config,
+        Credential.constCredential
+      )
+
+      let context = TestUtils.getContext();
+      let filesDir = context.filesDir;
+      let request =
+        new GetObjectRequest(TestConst.RETRY_BUCKET, "timeout",  filesDir + '/timeout');
       await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
       try {
         let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).getObject(request)

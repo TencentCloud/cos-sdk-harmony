@@ -218,7 +218,8 @@ export class CosXmlBaseService {
       cosXmlRequest.isNeedMD5,
       cosXmlRequest.isSignedInURL,
       this.cosXmlServiceConfig.requestConfiguration,
-      this.cosXmlServiceConfig.progressGranularity
+      this.cosXmlServiceConfig.progressGranularity,
+      this.cosXmlServiceConfig.disableBackupHost
     );
     qcloudHttpRequest.noSignHeaderKeys =
       new Set(Array.from(cosXmlRequest.noSignHeaderKeys).concat(Array.from(this.cosXmlServiceConfig.noSignHeaderKeys)));

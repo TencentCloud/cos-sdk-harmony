@@ -101,10 +101,12 @@ export class CosXmlServiceConfig {
   region: string|undefined;
 
   /**
-   * 单次网络请求的进度回调的时间颗粒度，默认为200ms
+   * 单次网络请求的进度回调的时间颗粒度，默认为500ms
    * 主要用于进度回调的频控，防止频率过高导致的anr等问题
    */
-  progressGranularity: number = 200;
+  progressGranularity: number = 500;
+
+  disableBackupHost:boolean = false;
 
   constructor(region?: string) {
     this.region = region;

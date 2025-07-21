@@ -30,11 +30,12 @@ export class HttpRequest<T> {
   dnsServers?: string[];
   requestConfiguration?: rcp.Configuration;
   progressGranularity?: number;
+  disableBackupHost?:boolean;
 
   constructor(method: http.RequestMethod, protocol: string, host: string, port: number, path: string,
     requestBodySerializer: RequestBodySerializer | undefined, responseBodyConverter: ResponseBodyConverter<T>,
     headers?: Map<string, string>, queries?: Map<string, string | undefined>, isNeedMD5?: boolean,
-    isSignedInURL?: boolean, requestConfiguration?: rcp.Configuration, progressGranularity?: number) {
+    isSignedInURL?: boolean, requestConfiguration?: rcp.Configuration, progressGranularity?: number,disableBackupHost?:boolean) {
     this.method = method;
     this.protocol = protocol;
     this.host = host;
@@ -50,6 +51,7 @@ export class HttpRequest<T> {
     this.isSignedInURL = isSignedInURL || false;
     this.requestConfiguration = requestConfiguration;
     this.progressGranularity = progressGranularity;
+    this.disableBackupHost = disableBackupHost;
   }
 
   addHeader(key: string, value: string): void {
@@ -119,13 +121,31 @@ export class HttpRequest<T> {
     }
   }
 
-
+  needChangeHost(host:string):boolean{
+    if (!host) {
+      return false;
+    }
+    if (host.includes(".cos.accelerate.myqcloud.com") || host.includes("service.cos.myqcloud.com")) {
+      return false;
+    }
+    if (host.includes(".myqcloud.com") && host.includes("cos.") && !host.includes(".cos.")) {
+      return false;
+    }
+    if (host.includes(".myqcloud.com") && host.includes(".cos.")) {
+      return true;
+    }
+    return false;
+  }
   /**
    * 生成URL
    * @returns URL
    */
-  buildURL(): string {
-    let url = `${this.protocol}://${this.host}${this.port == -1 ? "" : `:${this.port}`}/${this.path}`;
+  buildURL(change?:boolean): string {
+    let host = this.host;
+    if (change && this.needChangeHost(host)) {
+      host = host.replace("myqcloud.com","tencentcos.cn")
+    }
+    let url = `${this.protocol}://${host}${this.port == -1 ? "" : `:${this.port}`}/${this.path}`;
     if (this.queries.size > 0) {
       url += '?';
       for (const q of this.queries) {

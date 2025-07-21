@@ -21,7 +21,7 @@ export class QCloudHTTPTask<T> extends QCloudTask {
   httpRequest:QCloudHttpRequest<T>;
 
   requestData:QCloudRequestData;
-  private httpResponse: HttpResponse<T>|undefined;
+  httpResponse: HttpResponse<T>|undefined;
 
   onHeaderReceive: Callback<Record<string, string>> | undefined;
   onProgress: Callback<HttpProgress> | undefined;
@@ -36,10 +36,12 @@ export class QCloudHTTPTask<T> extends QCloudTask {
 
   async buildRequestData():Promise<boolean>{
     await this.httpRequest.prepareRequestData();
+    let change = false;
     if (this.retry.currentCount() > 0) {
+      change = !this.httpRequest.disableBackupHost;
       this.httpRequest.addHeader("x-cos-sdk-retry","true");
     }
-    let url = this.httpRequest?.buildURL();
+    let url = this.httpRequest?.buildURL(change);
 
     // 请求如果已经签名则不再本地或者服务端签名
     if(!this.httpRequest.headers.has(HttpHeader.AUTHORIZATION) || this.httpRequest.headers.get(HttpHeader.AUTHORIZATION)!.length == 0){
@@ -65,7 +67,6 @@ export class QCloudHTTPTask<T> extends QCloudTask {
         this.httpRequest.selfSignCallBack(this.httpRequest);
       }
     }
-
     this.requestData.url = url;
     this.requestData.headers = this.httpRequest.buildHeader();
     this.requestData.content = this.httpRequest.buildBody();
@@ -191,7 +192,6 @@ export class QCloudHTTPTask<T> extends QCloudTask {
     };
     emitter.emit(event);
   }
-
 
   shouldRetry(error:Error):boolean{
     if (!super.shouldRetry(error)) {
