@@ -181,6 +181,11 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
         request.addNoSignHeaderKeys(this.request.noSignHeaderKeys);
         request.addNoSignQueryKeys(this.request.noSignQueryKeys);
         request.priority = QCloudPriority.High;
+        request.onTimeInfo = (timeInfo) => {
+          if (this.onTimeInfo) {
+            this.onTimeInfo(request, timeInfo)
+          }
+        }
         try {
           await this.cosXmlBaseService.abortMultiUpload(request);
         } catch (e) {
@@ -237,6 +242,11 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
     request.addNoSignHeaderKeys(this.request.noSignHeaderKeys);
     request.addNoSignQueryKeys(this.request.noSignQueryKeys);
     request.onProgress = this.onProgress;
+    request.onTimeInfo = (timeInfo) => {
+      if (this.onTimeInfo) {
+        this.onTimeInfo(request, timeInfo)
+      }
+    }
     try {
       this.requestCacheArray.add(request);
       let result: PutObjectResult = await this.cosXmlBaseService.putObject(request);
@@ -288,6 +298,11 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
       request.addQueries(this.request.getQueries());
       request.addNoSignHeaderKeys(this.request.noSignHeaderKeys);
       request.addNoSignQueryKeys(this.request.noSignQueryKeys);
+      request.onTimeInfo = (timeInfo) => {
+        if (this.onTimeInfo) {
+          this.onTimeInfo(request, timeInfo)
+        }
+      }
       this.requestCacheArray.add(request);
       result = await this.cosXmlBaseService.listParts(request);
       QCloudLogger.info(`get listParts,uploadId:${uploadId} cosPath:${this.request.cosPath}},partNumberMarker:${result?.listParts?.nextPartNumberMarker} result:${JSON.stringify(result)}`, 'UploadTask');
@@ -380,6 +395,11 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
     request.addQueries(this.request.getQueries());
     request.addNoSignHeaderKeys(this.request.noSignHeaderKeys);
     request.addNoSignQueryKeys(this.request.noSignQueryKeys);
+    request.onTimeInfo = (timeInfo) => {
+      if (this.onTimeInfo) {
+        this.onTimeInfo(request, timeInfo)
+      }
+    }
     this.requestCacheArray.add(request);
     try {
       let result: InitMultipartUploadResult = await this.cosXmlBaseService.initMultipartUpload(request);
@@ -459,6 +479,11 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
           this.cancelRequest();
         }
       };
+      request.onTimeInfo = (timeInfo) => {
+        if (this.onTimeInfo) {
+          this.onTimeInfo(request, timeInfo)
+        }
+      }
 
       this.cosXmlBaseService.partUpload(request);
     }
@@ -486,6 +511,11 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
     let completeInput = new CompleteMultipartUpload();
     completeInput.part = this.uploadedParts;
     request.completeMultipartUpload = completeInput;
+    request.onTimeInfo = (timeInfo) => {
+      if (this.onTimeInfo) {
+        this.onTimeInfo(request, timeInfo)
+      }
+    }
 
     try {
       QCloudLogger.info(`finishUpload,uploadId:${this.uploadId}}`, 'UploadTask');

@@ -4,6 +4,7 @@ import { CosError,
   CosServiceError,
   CosXmlBaseService,
   CosXmlRequest,
+  CosXmlServiceConfig,
   GetObjectRequest, HttpProgress,
   ListPartsRequest,
   ListPartsResult,
@@ -19,6 +20,8 @@ import { TestUtils } from '../common/TestUtils';
 import { ArrayList } from '@kit.ArkTS';
 import { Credential } from '../common/Credential';
 import { HttpHeader } from '@tencentcloud/foundation';
+import { rcp } from '@kit.RemoteCommunicationKit';
+import json from '@ohos.util.json';
 
 export default function uploadTest(cosXmlBaseService: CosXmlBaseService) {
   describe('uploadTest', () => {
@@ -261,6 +264,58 @@ export default function uploadTest(cosXmlBaseService: CosXmlBaseService) {
         Logger.info(`bigUpload_onProgress：${progress.complete}/${progress.target}`)
         progressCount++;
       };
+      task.onResult = {
+        onSuccess: (request, result) => {
+          Logger.info(`bigUpload_success`)
+          Logger.info(`bigUpload_progressCount：${progressCount}/`)
+          Logger.info(result)
+          expect(true).assertTrue();
+          done();
+        },
+        onFail: (request, error) => {
+          Logger.info(`bigUpload_fail`)
+          Logger.info(`bigUpload_progressCount：${progressCount}/`)
+          Logger.info(error)
+          expect().assertFail()
+          done();
+        }
+      }
+      task.start();
+    })
+
+    it('bigUploadNet', 0, async (done: Function) => {
+      let filePath = FileUtils.getFile(2 * 1024 * 1024,'bigUpload');
+      let putRequest = new PutObjectRequest(TestConst.PERSIST_BUCKET, `uploadTest/UT/bigUpload`, filePath);
+
+      let context = TestUtils.getContext();
+      let config = new CosXmlServiceConfig(TestConst.PERSIST_BUCKET_REGION);
+      const customDnsServers: rcp.DnsServers = [
+        { ip: "8.8.8.8" },
+        { ip: "8.8.4.4", port: 53 }
+      ];
+      config.dnsConfiguration = {dnsRules:customDnsServers};
+      let constCredentialService = new CosXmlBaseService(
+        context,
+        config,
+        Credential.constCredential
+      )
+
+      let task: UploadTask = constCredentialService.upload(
+        putRequest,
+
+      );
+      let progressCount = 0;
+      task.onProgress = (progress: HttpProgress) => {
+        Logger.info(`bigUpload_onProgress：${progress.complete}/${progress.target}`)
+        progressCount++;
+        if(progressCount > 3 && progressCount < 5){
+          CosXmlBaseService.refreshSession();
+        }
+      };
+      task.onTimeInfo = (request: CosXmlRequest, timeInfo: rcp.TimeInfo) => {
+        Logger.info(`bigUpload_onTimeInfo：${request.getMethod()+' '+request.getPath(cosXmlBaseService.cosXmlServiceConfig)}`)
+        Logger.info(`bigUpload_onTimeInfo：${json.stringify(timeInfo)}`)
+      }
       task.onResult = {
         onSuccess: (request, result) => {
           Logger.info(`bigUpload_success`)

@@ -4,6 +4,7 @@ import { window } from '@kit.ArkUI';
 import { CosXmlBaseService, CosXmlServiceConfig, QCloudCredential,QCloudLogger } from '@tencentcloud/cos';
 import { Credential } from '../Credential';
 import { Const, CredentialType } from '../Const';
+import { rcp } from '@kit.RemoteCommunicationKit';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
@@ -25,6 +26,11 @@ export default class EntryAbility extends UIAbility {
       let config = new CosXmlServiceConfig(Const.TEST_BUCKET_REGION);
       config.retrySleep = 5 * 1000;
       // config.readTimeout = 30 * 1000 * 1000;
+      const customDnsServers: rcp.DnsServers = [
+        { ip: "8.8.8.8" },
+        { ip: "8.8.4.4", port: 53 }
+      ];
+      config.dnsConfiguration = {dnsRules:customDnsServers};
       CosXmlBaseService.initDefaultService(
         this.context.getApplicationContext(),
         config,

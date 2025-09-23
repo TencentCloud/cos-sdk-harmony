@@ -388,7 +388,7 @@ export default function downloadTest(cosXmlBaseService: CosXmlBaseService) {
     it('ci', 0, async (done: Function) => {
       let context = TestUtils.getContext();
       let filesDir = context.filesDir;
-      let request = new GetObjectRequest(TestConst.PERSIST_CI_BUCKET, "test.png", filesDir + '/image.png');
+      let request = new GetObjectRequest(TestConst.PERSIST_BUCKET, TestConst.PERSIST_BUCKET_PIC_PATH, filesDir + '/image.png');
       request.addQuery("imageMogr2/rotate/70");
       await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
       let downloadTask = TestUtils.getCosXmlBaseService(cosXmlBaseService).download(request);
@@ -417,7 +417,7 @@ export default function downloadTest(cosXmlBaseService: CosXmlBaseService) {
     it('ciBig', 0, async (done: Function) => {
       let context = TestUtils.getContext();
       let filesDir = context.filesDir;
-      let request = new GetObjectRequest(TestConst.PERSIST_CI_BUCKET,"test.png", filesDir + '/6m.jpg');
+      let request = new GetObjectRequest(TestConst.PERSIST_BUCKET, TestConst.PERSIST_BUCKET_PIC_6M_PATH, filesDir + '/6m.jpg');
       request.addQuery("imageMogr2/rotate/70");
       await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
       let downloadTask = TestUtils.getCosXmlBaseService(cosXmlBaseService).download(request);

@@ -4,6 +4,7 @@ import { CosXmlServiceConfig } from '../CosXmlServiceConfig';
 import { Callback } from '@ohos.base';
 import { CosError } from '../error/CosError';
 import { COS_VERSION } from '../../../../Index';
+import { rcp } from '@kit.RemoteCommunicationKit';
 
 export abstract class CosXmlRequest {
   public abstract getMethod(): http.RequestMethod;
@@ -84,6 +85,11 @@ export abstract class CosXmlRequest {
    * 失败响应回调
    */
   onFailure: Callback<CosError> | undefined;
+
+  /**
+   * 耗时信息回调
+   */
+  onTimeInfo: Callback<rcp.TimeInfo> | undefined;
 
   /**
    * 添加一个请求头

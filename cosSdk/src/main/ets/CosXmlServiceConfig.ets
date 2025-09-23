@@ -38,22 +38,12 @@ export class CosXmlServiceConfig {
   connectTimeout: number = 15 * 1000;
 
   /**
-   * 设置使用https协议的服务器进行DNS解析。
-   * 参数必须以以下格式进行URL编码："https:// host:port/path"。
+   * 设置DNS配置
    *
    * 若设置了 requestConfiguration，则该参数不生效。需要在 requestConfiguration 中设置。
-   * 具体请参考：https://developer.huawei.com/consumer/cn/doc/harmonyos-references-V5/remote-communication-rcp-V5#section1898141153617
+   * 具体请参考：https://developer.huawei.com/consumer/cn/doc/harmonyos-references/remote-communication-rcp#section9677185417382
    */
-  dnsOverHttps: string | undefined;
-  /**
-   * 设置指定的DNS服务器进行DNS解析。
-   * -可以设置多个DNS解析服务器，最多3个服务器。如果有3个以上，只取前3个。
-   * -服务器必须是IPV4或者IPV6地址。
-   *
-   * 若设置了 requestConfiguration，则该参数不生效。需要在 requestConfiguration 中设置。
-   * 具体请参考：https://developer.huawei.com/consumer/cn/doc/harmonyos-references-V5/remote-communication-rcp-V5#section1898141153617
-   */
-  dnsServers: Array<string> | undefined;
+  dnsConfiguration?: rcp.DnsConfiguration;
 
   /**
    * 网络高级配置

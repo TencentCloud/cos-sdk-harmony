@@ -8,7 +8,7 @@ export enum CredentialType {
 }
 
 export class Const {
-  public static readonly CREDENTIAL_TYPE: CredentialType = CredentialType.STS;// 临时密钥STS和固定密钥CONST
+  public static readonly CREDENTIAL_TYPE: CredentialType = CredentialType.CONST;// 临时密钥STS和固定密钥CONST
   public static readonly STS_CREDENTIAL_URL = "http://*********:3000/sts";
   public static readonly CONST_SECRET_ID = "XXXXXXXXXXXXXXXXXXXXXXX";
   public static readonly CONST_SECRET_KEY = "XXXXXXXXXXXXXXXXXXXXXXX";

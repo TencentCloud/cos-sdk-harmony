@@ -147,6 +147,11 @@ export class DownloadTask extends TransferTask<GetObjectRequest, CosXmlDownloadT
       this.eTag = header[HttpHeader.ETAG];
       contentLength = header[HttpHeader.CONTENT_LENGTH];
     }
+    this.headObjectRequest.onTimeInfo = (timeInfo) => {
+      if (this.onTimeInfo && this.headObjectRequest) {
+        this.onTimeInfo(this.headObjectRequest, timeInfo)
+      }
+    }
     try {
       let headObjectResult = await this.cosXmlBaseService.headObject(this.headObjectRequest);
       let absolutePath = await this.hasExisted();
@@ -198,6 +203,11 @@ export class DownloadTask extends TransferTask<GetObjectRequest, CosXmlDownloadT
       let onProgress = this.onProgress;
       if (onProgress) {
         onProgress(new HttpProgress(httpProgress.complete + fileOffset, httpProgress.target + fileOffset));
+      }
+    }
+    this.getObjectRequest.onTimeInfo = (timeInfo) => {
+      if (this.onTimeInfo && this.getObjectRequest) {
+        this.onTimeInfo(this.getObjectRequest, timeInfo)
       }
     }
     try {

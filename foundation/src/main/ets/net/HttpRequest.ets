@@ -26,8 +26,7 @@ export class HttpRequest<T> {
   responseBodyConverter: ResponseBodyConverter<T>;
   readTimeout: number = 60000; // 单位毫秒（ms）
   connectTimeout: number = 60000; // 单位毫秒（ms）
-  dnsOverHttps?: string;
-  dnsServers?: string[];
+  dnsConfiguration?: rcp.DnsConfiguration;
   requestConfiguration?: rcp.Configuration;
   progressGranularity?: number;
   disableBackupHost?:boolean;
@@ -200,27 +199,8 @@ export class HttpRequest<T> {
       }
     }
 
-    if (this.dnsServers) {
-      if (!requestConfig.dns) {
-        requestConfig.dns = {};
-      }
-      let customDnsServers: rcp.DnsServers = this.dnsServers.map(item => {
-        let ipItem: rcp.IpAndPort = { ip: item }
-        return ipItem;
-      })
-      requestConfig.dns.dnsRules = customDnsServers;
-    }
-
-
-    if (this.dnsOverHttps) {
-      if (!requestConfig.dns) {
-        requestConfig.dns = {};
-      }
-      let dohConfig: rcp.DnsOverHttpsConfiguration = {
-        url: this.dnsOverHttps,
-        skipCertificatesValidation: true
-      };
-      requestConfig.dns.dnsOverHttps = dohConfig;
+    if (this.dnsConfiguration) {
+      requestConfig.dns = this.dnsConfiguration;
     }
     return requestConfig;
   }

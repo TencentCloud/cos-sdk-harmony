@@ -6,6 +6,8 @@ export class TestConst {
   public static readonly SECRET_KEY = "";
   public static readonly PERSIST_BUCKET_REGION = "ap-guangzhou";
   public static readonly PERSIST_BUCKET = "mobile-ut-1253960454";
+  public static readonly RETRY_BUCKET_REGION = "ap-guangzhou";
+  public static readonly RETRY_BUCKET = "mobile-ut-1253960454";
 
   public static readonly PERSIST_BUCKET_BIG_FILE_PATH = "do_not_remove/522m.zip";
   public static readonly PERSIST_BUCKET_BIG_10M_PATH = "do_not_remove/big_object";

@@ -15,6 +15,7 @@ import { QCloudHttpRequest } from '../../net/QCloudHttpRequest';
 import { QCloudAuthenticationError } from '../../error/QCloudAuthenticationError';
 import { QCloudLogger } from '../../logger/QCloudLogger';
 import { HttpHeader } from '../../net/HttpConstants';
+import { rcp } from '@kit.RemoteCommunicationKit';
 
 export class QCloudHTTPTask<T> extends QCloudTask {
   private readonly TAG = "HTTP";
@@ -27,6 +28,7 @@ export class QCloudHTTPTask<T> extends QCloudTask {
   onProgress: Callback<HttpProgress> | undefined;
   onSuccess: Callback<HttpResponse<T>> | undefined;
   onFailure: Callback<Error> | undefined;
+  onTimeInfo: Callback<rcp.TimeInfo> | undefined;
 
   constructor(httpRequest:QCloudHttpRequest<T>) {
     super(TaskHTTPExecuteFunc);
@@ -113,6 +115,9 @@ export class QCloudHTTPTask<T> extends QCloudTask {
       try {
         emitter.off(this.taskId);
         QCloudLogger.info((data.result as number).toString(), this.TAG+"_httpCode");
+        if(this.onTimeInfo && data.timeInfo){
+          this.onTimeInfo(data.timeInfo)
+        }
         let t = this.httpRequest.responseBodyConverter.convertEnd(data.result as number);
         if (this.onSuccess) {
           if(this.httpResponse){

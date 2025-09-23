@@ -1,8 +1,12 @@
 import { BusinessError } from '@ohos.base';
 import picker from '@ohos.file.picker';
-import { CosXmlBaseService, HttpProgress, PutObjectRequest, UploadTask, CosXmlUploadTaskResult, CosError } from '@tencentcloud/cos';
+import { CosXmlBaseService, HttpProgress, PutObjectRequest, UploadTask, CosXmlUploadTaskResult, CosError,
+  CosXmlRequest } from '@tencentcloud/cos';
 import { Const } from '../../Const';
 import { sizeFormat } from '../../utils/Utils';
+import { rcp } from '@kit.RemoteCommunicationKit';
+import { Logger } from '../../utils/Logger';
+import json from '@ohos.util.json';
 
 @Entry
 @Component
@@ -95,6 +99,10 @@ export struct UploadPage {
       this.total = progress.target;
       this.value = progress.complete;
     };
+    task.onTimeInfo = (request: CosXmlRequest, timeInfo: rcp.TimeInfo) => {
+      Logger.info(`bigUpload_onTimeInfo：${request.getMethod()+' '+request.getPath(CosXmlBaseService.default().cosXmlServiceConfig)}`)
+      Logger.info(`bigUpload_onTimeInfo：${json.stringify(timeInfo)}`)
+    }
     task.onResult = {
       onSuccess:(request, result: CosXmlUploadTaskResult)=>{
         this.uploadId = undefined;

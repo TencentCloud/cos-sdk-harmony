@@ -19,9 +19,10 @@ export default function testsuite() {
 
   // 最终整体执行时再放开，不然单独执行某个case的时候也会执行两遍
   // 固定秘钥的cos service
+  let config = new CosXmlServiceConfig(TestConst.PERSIST_BUCKET_REGION);
   let constCredentialService = new CosXmlBaseService(
     context,
-    new CosXmlServiceConfig(TestConst.PERSIST_BUCKET_REGION),
+    config,
     Credential.constCredential
   )
 

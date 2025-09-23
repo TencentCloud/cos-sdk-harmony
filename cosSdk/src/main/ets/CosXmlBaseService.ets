@@ -9,7 +9,8 @@ import {
   QCloudLogger,
   RetryHandler,
   QCloudSignatureBuilder,
-  SelfSignCallBack
+  SelfSignCallBack,
+  QCloudSessionManager
 } from '@tencentcloud/foundation';
 import { CosXmlRequest } from './model/CosXmlRequest';
 import { CosXmlResult } from './model/CosXmlResult';
@@ -66,6 +67,7 @@ import { DeleteObjectTagResult } from './model/object/DeleteObjectTagResult';
 import { DeleteObjectTagRequest } from './model/object/DeleteObjectTagRequest';
 import { GetObjectTagRequest, GetObjectTagResult, PutBucketTagResult } from '../../../Index';
 import { JSON } from '@kit.ArkTS';
+import { rcp } from '@kit.RemoteCommunicationKit';
 
 /**
  * 提供用于访问Tencent Cloud COS服务的基础服务类。
@@ -188,6 +190,13 @@ export class CosXmlBaseService {
   }
 
   /**
+   * 重建网络连接session，防止假死
+   */
+  public static refreshSession(): void {
+    return QCloudSessionManager.manager().refreshSession();
+  }
+
+  /**
    * 构建网络请求
    */
   protected buildHttpRequest<T1 extends CosXmlRequest, T2 extends CosXmlResult>(cosXmlRequest: T1,
@@ -226,8 +235,7 @@ export class CosXmlBaseService {
     qcloudHttpRequest.noSignQueryKeys = cosXmlRequest.noSignQueryKeys;
     qcloudHttpRequest.readTimeout = this.cosXmlServiceConfig.readTimeout;
     qcloudHttpRequest.connectTimeout = this.cosXmlServiceConfig.connectTimeout;
-    qcloudHttpRequest.dnsOverHttps = this.cosXmlServiceConfig.dnsOverHttps;
-    qcloudHttpRequest.dnsServers = this.cosXmlServiceConfig.dnsServers;
+    qcloudHttpRequest.dnsConfiguration = this.cosXmlServiceConfig.dnsConfiguration;
     qcloudHttpRequest.credential = cosXmlRequest.credential;
     qcloudHttpRequest.credentialCallBack = this.credentialCallBack;
     if (this.selfSignCallBack) {
@@ -275,6 +283,11 @@ export class CosXmlBaseService {
           }
           resolve(cosXmlResult);
         };
+        task.onTimeInfo = (timeInfo: rcp.TimeInfo) => {
+          if (cosXmlRequest.onTimeInfo) {
+            cosXmlRequest.onTimeInfo(timeInfo);
+          }
+        }
         task.onFailure = (err: Error) => {
           let cosError = CosErrorUtils.transformCosError(err);
           if (cosXmlRequest.onFailure) {

@@ -1,6 +1,6 @@
 import { ObjectRequest } from './ObjectRequest';
 import http from '@ohos.net.http';
-import { HttpHeader, RequestBodySerializer } from '@tencentcloud/foundation';
+import { HttpHeader, RequestBodySerializer, ContentType } from '@tencentcloud/foundation';
 import { getCotnentType } from '../../common/Constants';
 
 /**
@@ -12,7 +12,8 @@ import { getCotnentType } from '../../common/Constants';
  */
 export class InitMultipartUploadRequest extends ObjectRequest {
   public getBodySerializer(): RequestBodySerializer|undefined {
-    return undefined;
+    // 不能返回undefined，因为有些代理或者网络不允许post请求没有content-lentgh
+    return RequestBodySerializer.wrap(ContentType.OCTET_STREAM, "");
   }
   public getMethod(): http.RequestMethod {
     return http.RequestMethod.POST;

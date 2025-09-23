@@ -16,7 +16,7 @@
    ``` bash
       "dependencies": {
          ...
-         "@tencentcloud/cos":"1.1.9"
+         "@tencentcloud/cos":"1.2.0"
       }
    ```
 2. SDK 需要网络权限，用于与 COS 服务器进行通信，请在应用模块下的 module.json5 中添加如下权限声明：
@@ -444,23 +444,11 @@ CosXmlServiceConfig 用于配置 COS 服务，其主要成员说明如下：
 </tr>
 
 <tr>
-<td rowspan="1" colSpan="1" >dnsOverHttps</td>
+<td rowspan="1" colSpan="1" >dnsConfiguration</td>
 
 <td rowspan="1" colSpan="1" >设置使用https协议的服务器进行DNS解析</td>
 
-<td rowspan="1" colSpan="1" >string</td>
-
-<td rowspan="1" colSpan="1" >无</td>
-
-<td rowspan="1" colSpan="1" >否</td>
-</tr>
-
-<tr>
-<td rowspan="1" colSpan="1" >dnsServers</td>
-
-<td rowspan="1" colSpan="1" >设置指定的DNS服务器进行DNS解析，最多3个</td>
-
-<td rowspan="1" colSpan="1" >Array<string></td>
+<td rowspan="1" colSpan="1" >rcp.DnsConfiguration</td>
 
 <td rowspan="1" colSpan="1" >无</td>
 

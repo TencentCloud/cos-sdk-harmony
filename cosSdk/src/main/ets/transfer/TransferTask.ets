@@ -6,12 +6,17 @@ import { CosXmlRequest } from '../model/CosXmlRequest';
 import { CosXmlResult } from '../model/CosXmlResult';
 import { CosError } from '../error/CosError';
 import { CosErrorUtils } from '../util/CosErrorUtils';
+import { rcp } from '@kit.RemoteCommunicationKit';
 
 export abstract class TransferTask<T1, T2> {
   protected cosXmlBaseService: CosXmlBaseService;
   protected objectRequest: T1;
   onResult: TransferResultListener<T1, T2> | undefined;
   onProgress: Callback<HttpProgress> | undefined;
+  /**
+   * 耗时信息回调
+   */
+  onTimeInfo?: (request: CosXmlRequest, timeInfo: rcp.TimeInfo)=>void;
 
   // onState: Callback<TransferState> | undefined;
 

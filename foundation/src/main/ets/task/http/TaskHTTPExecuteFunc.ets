@@ -19,6 +19,13 @@ export class QCloudSessionManager {
     }
     return QCloudSessionManager.service;
   }
+
+  public refreshSession(){
+    if (this.session) {
+      this.session.close();
+    }
+    this.session = rcp.createSession();
+  }
 }
 
 export async function TaskHTTPExecuteFunc(qcloudRequestData: QCloudRequestData) {
@@ -93,8 +100,10 @@ export async function TaskHTTPExecuteFunc(qcloudRequestData: QCloudRequestData) 
   let requestConfig = qcloudRequestData.requestConfiguration;
   if (requestConfig?.tracing) {
     requestConfig.tracing.httpEventsHandler = customHttpEventsHandler
+    requestConfig.tracing.collectTimeInfo = true
   } else {
     const tracingConfig: rcp.TracingConfiguration = {
+      collectTimeInfo: true,
       httpEventsHandler: customHttpEventsHandler
     };
     requestConfig!.tracing = tracingConfig;
@@ -103,7 +112,7 @@ export async function TaskHTTPExecuteFunc(qcloudRequestData: QCloudRequestData) 
   let req = new rcp.Request(qcloudRequestData.url!, qcloudRequestData.method,qcloudRequestData.headers,qcloudRequestData.content,undefined,undefined,requestConfig);
 
   QCloudSessionManager.manager().session.fetch(req).then((response) => {
-    SendOrderEvent(new QCloudTransferData(QCloudEventType.finish, response.statusCode, null), 2, 3);
+    SendOrderEvent(new QCloudTransferData(QCloudEventType.finish, response.statusCode, null, response.timeInfo), 2, 3);
     finish();
   }).catch((err: BusinessError) => {
     SendEvent(new QCloudTransferData(QCloudEventType.netError, null, err));
