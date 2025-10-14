@@ -2,8 +2,8 @@
   "app": {
     "bundleName": "com.tencent.cloud.cos",
     "vendor": "example",
-    "versionCode": 1010200,
-    "versionName": "1.2.0",
+    "versionCode": 1010201,
+    "versionName": "1.2.1",
     "icon": "$media:app_icon",
     "label": "$string:app_name"
   }

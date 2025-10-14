@@ -40,8 +40,8 @@
       "name": "cosTransferPractice",
       "dependencies": {
         "@tencentcloud/cos": {
-          "specifier": "file:cosTransferPractice/cosSdk-1.2.0.har",
-          "version": "file:cosTransferPractice/cosSdk-1.2.0.har"
+          "specifier": "1.2.1",
+          "version": "1.2.1"
         }
       },
       "devDependencies": {},
@@ -83,8 +83,9 @@
       "dynamic": false,
       "maskedByOverrideDependencyMap": false
     },
-    "@tencentcloud/cos@file:cosTransferPractice/cosSdk-1.2.0.har": {
-      "storePath": "oh_modules/.ohpm/@tencentcloud+cos@parzynam7gxrq3k5yi6ejzihm0qfcy4sbcbszqdtpwa=",
+    "@tencentcloud/cos@1.2.1": {
+      "integrity": "sha512-l/wI1o9qHoJWshef57ygLo88P3UCCNaq8xToo7n4Ee1bqyofBkKrf61kcbBoOw0Arx3aqxPtJJFPov/npzBX4g==",
+      "storePath": "oh_modules/.ohpm/@tencentcloud+cos@1.2.1",
       "dependencies": {
         "@tencentcloud/foundation": "cosSdk/foundation120.har"
       },

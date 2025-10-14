@@ -19,9 +19,10 @@ import { TestConst } from '../common/TestConst';
 import { TestUtils } from '../common/TestUtils';
 import { ArrayList } from '@kit.ArkTS';
 import { Credential } from '../common/Credential';
-import { HttpHeader } from '@tencentcloud/foundation';
+import { HttpHeader, QCloudLogger } from '@tencentcloud/foundation';
 import { rcp } from '@kit.RemoteCommunicationKit';
 import json from '@ohos.util.json';
+import { hilog } from '@kit.PerformanceAnalysisKit';
 
 export default function uploadTest(cosXmlBaseService: CosXmlBaseService) {
   describe('uploadTest', () => {
@@ -252,6 +253,10 @@ export default function uploadTest(cosXmlBaseService: CosXmlBaseService) {
     })
 
     it('bigUpload', 0, async (done: Function) => {
+      CosXmlBaseService.setDebuggable(true);
+      QCloudLogger.logOutputCallback = (log)=>{
+        hilog.info(0x6666, 'logOutputCallback', log);
+      }
       let filePath = FileUtils.getFile(2 * 1024 * 1024,'bigUpload');
       let putRequest = new PutObjectRequest(TestConst.PERSIST_BUCKET, `uploadTest/UT/bigUpload`, filePath);
       await TestUtils.requestAddCredential(putRequest, TestUtils.getCosXmlBaseService(cosXmlBaseService));

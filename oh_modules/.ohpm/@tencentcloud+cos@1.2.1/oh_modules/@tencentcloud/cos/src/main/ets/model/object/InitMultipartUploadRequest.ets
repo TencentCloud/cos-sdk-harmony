@@ -12,8 +12,13 @@ import { getCotnentType } from '../../common/Constants';
  */
 export class InitMultipartUploadRequest extends ObjectRequest {
   public getBodySerializer(): RequestBodySerializer|undefined {
+    return RequestBodySerializer.wrap(ContentType.OCTET_STREAM, undefined);
+
+    // 不能传入""，api 17中这种网络请求会卡主，没有任何回调
+    // return RequestBodySerializer.wrap(ContentType.OCTET_STREAM, "");
+
     // 不能返回undefined，因为有些代理或者网络不允许post请求没有content-lentgh
-    return RequestBodySerializer.wrap(ContentType.OCTET_STREAM, "");
+    // return undefined;
   }
   public getMethod(): http.RequestMethod {
     return http.RequestMethod.POST;
