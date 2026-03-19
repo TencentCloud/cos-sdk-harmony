@@ -38,9 +38,10 @@ export class QCloudHTTPTask<T> extends QCloudTask {
 
   async buildRequestData():Promise<boolean>{
     await this.httpRequest.prepareRequestData();
-    let change = false;
+    // 根据域名切换标记决定是否使用备用域名
+    let change = this.retry.isHostSwitched();
+    // 重试时添加重试标记头（重试次数 > 0 表示正在重试）
     if (this.retry.currentCount() > 0) {
-      change = !this.httpRequest.disableBackupHost;
       this.httpRequest.addHeader("x-cos-sdk-retry","true");
     }
     let url = this.httpRequest?.buildURL(change);
@@ -198,15 +199,22 @@ export class QCloudHTTPTask<T> extends QCloudTask {
     emitter.emit(event);
   }
 
-  shouldRetry(error:Error):boolean{
-    if (!super.shouldRetry(error)) {
-      return false;
-    }
-    return this.httpRequest.shouldRetry(error);
-  }
-
   public reset(): void {
     super.reset();
     this.httpRequest.reset();
+  }
+
+  /**
+   * 获取当前重试次数
+   */
+  public getRetryCount(): number {
+    return this.retry.currentCount();
+  }
+
+  /**
+   * 获取最终请求的 URL
+   */
+  public getRequestUrl(): string | undefined {
+    return this.requestData?.url?.toString();
   }
 }

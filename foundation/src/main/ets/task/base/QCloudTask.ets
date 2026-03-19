@@ -60,13 +60,6 @@ export class QCloudTask {
     await this.buildRequestData();
   }
 
-  shouldRetry(error:Error):boolean{
-    if (!this.retry.shouldRetry()) {
-      return false;
-    }
-    return true;
-  }
-
   cancel(){
     // 任务未开始，只需在manager等待队列中删除即可。
     if (this.state != QCloudTaskState.Process) {

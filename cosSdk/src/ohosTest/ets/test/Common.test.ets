@@ -160,7 +160,6 @@ export default function commonTest(cosXmlBaseService: CosXmlBaseService) {
 
       task.onTaskReceiveData(data);
 
-      task.shouldRetry(Error("test"));
       done();
     })
 

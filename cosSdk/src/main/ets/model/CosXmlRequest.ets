@@ -6,6 +6,22 @@ import { CosError } from '../error/CosError';
 import { COS_VERSION } from '../../../../Index';
 import { rcp } from '@kit.RemoteCommunicationKit';
 
+/**
+ * HTTP Task 信息接口
+ * 用于获取重试次数和最终请求URL等信息
+ */
+export interface HttpTaskInfo {
+  /**
+   * 获取当前重试次数
+   */
+  getRetryCount(): number;
+  
+  /**
+   * 获取最终请求的URL
+   */
+  getRequestUrl(): string | undefined;
+}
+
 export abstract class CosXmlRequest {
   public abstract getMethod(): http.RequestMethod;
   public abstract getPath(cosXmlServiceConfig: CosXmlServiceConfig): string;
@@ -25,6 +41,12 @@ export abstract class CosXmlRequest {
   priority:QCloudPriority = QCloudPriority.Normal;
 
   taskId?: number;
+
+  /**
+   * 对应的 HTTP Task 引用
+   * 可用于获取重试次数和最终请求URL等信息
+   */
+  httpTask?: HttpTaskInfo;
 
   /**
    * 设置请求头

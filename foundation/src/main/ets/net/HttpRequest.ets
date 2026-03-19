@@ -57,10 +57,6 @@ export class HttpRequest<T> {
     this.headers.set(key, value);
   }
 
-  shouldRetry(error: Error) {
-    return true;
-  }
-
   removeHeader(key: string): void {
     this.headers.delete(key);
   }

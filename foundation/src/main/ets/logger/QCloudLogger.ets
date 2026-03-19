@@ -4,7 +4,7 @@ import { LoggerOptions } from './LoggerOptions'
 export type QCloudLogOutputCallback = (log:string) => void;
 export class QCloudLogger {
   private static mTag?: string = "QCloudLog"
-  private static mDomain?: number = 0x0369 //日志对应的领域标识，范围是0x0~0xFFFF
+  private static mDomain?: number = 0x0369 //日志对应的领域标识A00369，范围是0x0~0xFFFF
   private static mHilog?: boolean = true //默认是用hilog进行打印
   private static mShowLogLocation?: boolean = false //展示点击的位置
   private static mLogSize = 1024 //打印的最大长度，默认是1024
@@ -99,17 +99,16 @@ export class QCloudLogger {
    *统一输出日志
    * */
   private static logLevel(level: hilog.LogLevel, tag?: string, message: string | object = "") {
+    //如果关闭状态且没有业务日志回调，则不打印日志
+    if (QCloudLogger.mClose && !QCloudLogger.logOutputCallback) {
+      return
+    }
 
     //未传递时
     if (tag == undefined) {
       tag = QCloudLogger.mTag
     }
-
-    let content :string = "";
-
-    if (QCloudLogger.logOutputCallback || QCloudLogger.mClose){
-      content = QCloudLogger.getMessage(level, tag, message) //最终的内容展示
-    }
+    const content = QCloudLogger.getMessage(level, tag, message) //最终的内容展示
 
     if (QCloudLogger.logOutputCallback){
       QCloudLogger.logOutputCallback(content);

@@ -31,18 +31,3 @@ export abstract class ResponseBodyConverter<T> {
     return textDecoder.decodeWithStream(new Uint8Array(buffer))
   }
 }
-
-// export class ResponseStringConverter extends ResponseBodyConverter<string> {
-//   headersReceive(header: Record<string, string>): void {
-//   }
-//   buffers: ArrayBuffer[] = [];
-//   convertPart(arrayBuffer: ArrayBuffer): void {
-//     this.buffers.push(arrayBuffer);
-//   }
-//
-//   convertEnd(httpCode: number): string {
-//     const combinedBuffer = this.concatenateArrayBuffers(...this.buffers);
-//     const result = this.arrayBufferToString(combinedBuffer);
-//     return result;
-//   }
-// }

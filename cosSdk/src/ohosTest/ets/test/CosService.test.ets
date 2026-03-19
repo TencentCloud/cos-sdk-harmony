@@ -123,11 +123,11 @@ export default function cosServiceTest(cosXmlBaseService: CosXmlBaseService) {
       let context = TestUtils.getContext();
       let filesDir = context.filesDir;
       let request =
-        new GetObjectRequest(TestConst.PERSIST_BUCKET, TestConst.PERSIST_BUCKET_PIC_PATH, filesDir + '/test.jpg');
+        new GetObjectRequest(TestConst.PERSIST_BUCKET, TestConst.PERSIST_BUCKET_PIC_6M_PATH, filesDir + '/test.jpg');
       await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
       try {
         request.onProgress = (httpProgress) => {
-          if (httpProgress.complete / httpProgress.target > 0.1) {
+          if (httpProgress.complete / httpProgress.target > 0.2) {
             TestUtils.getCosXmlBaseService(cosXmlBaseService).cancel(request)
           }
         }
@@ -181,7 +181,7 @@ export default function cosServiceTest(cosXmlBaseService: CosXmlBaseService) {
     // })
     it('presignedPut', 0, async (done: Function) => {
       let request =
-        new PresignedUrlRequest(TestConst.PERSIST_BUCKET, TestConst.PERSIST_BUCKET_PUT_PATH, http.RequestMethod.PUT);
+        new PresignedUrlRequest(TestConst.PERSIST_CI_BUCKET, TestConst.PERSIST_BUCKET_PUT_PATH, http.RequestMethod.PUT);
       await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
       try {
         let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).buildPresignedUrl(request)
@@ -215,7 +215,7 @@ export default function cosServiceTest(cosXmlBaseService: CosXmlBaseService) {
     })
     it('presignedGet', 0, async (done: Function) => {
       let request =
-        new PresignedUrlRequest(TestConst.PERSIST_BUCKET, TestConst.PERSIST_BUCKET_PIC_PATH, http.RequestMethod.GET);
+        new PresignedUrlRequest(TestConst.PERSIST_CI_BUCKET, TestConst.PERSIST_BUCKET_PIC_PATH, http.RequestMethod.GET);
       await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));
       try {
         let result = await TestUtils.getCosXmlBaseService(cosXmlBaseService).buildPresignedUrl(request)
@@ -292,7 +292,7 @@ export default function cosServiceTest(cosXmlBaseService: CosXmlBaseService) {
       done();
     })
     it('headObjectIsSignedInURL', 0, async (done: Function) => {
-      let request = new HeadObjectRequest(TestConst.PERSIST_BUCKET, TestConst.PERSIST_BUCKET_PIC_PATH);
+      let request = new HeadObjectRequest(TestConst.PERSIST_CI_BUCKET, TestConst.PERSIST_BUCKET_PIC_PATH);
       request.isSignedInURL = true;
       // request.addNoSignHeaderKey(HttpHeader.HOST)
       await TestUtils.requestAddCredential(request, TestUtils.getCosXmlBaseService(cosXmlBaseService));

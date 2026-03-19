@@ -28,8 +28,8 @@
       "name": "cosSdk",
       "dependencies": {
         "@tencentcloud/foundation": {
-          "specifier": "file:cosSdk/foundation120.har",
-          "version": "file:cosSdk/foundation120.har"
+          "specifier": "file:cosSdk/foundation122.har",
+          "version": "file:cosSdk/foundation122.har"
         }
       },
       "devDependencies": {},
@@ -40,8 +40,8 @@
       "name": "cosTransferPractice",
       "dependencies": {
         "@tencentcloud/cos": {
-          "specifier": "1.2.1",
-          "version": "1.2.1"
+          "specifier": "file:cosTransferPractice/cosSdk-1.2.2.har",
+          "version": "file:cosTransferPractice/cosSdk-1.2.2.har"
         }
       },
       "devDependencies": {},
@@ -75,19 +75,18 @@
       "dynamic": false,
       "maskedByOverrideDependencyMap": false
     },
-    "@tencentcloud/foundation@file:cosSdk/foundation120.har": {
-      "storePath": "oh_modules/.ohpm/@tencentcloud+foundation@mydry2qpallkyakume8jkdoyrgu+clv2bizazyilej0=",
+    "@tencentcloud/foundation@file:cosSdk/foundation122.har": {
+      "storePath": "oh_modules/.ohpm/@tencentcloud+foundation@fcrrwxfjqhmhmjbgprhgslx9larcoq1aqz6yvxldfog=",
       "dependencies": {},
       "dynamicDependencies": {},
       "dev": false,
       "dynamic": false,
       "maskedByOverrideDependencyMap": false
     },
-    "@tencentcloud/cos@1.2.1": {
-      "integrity": "sha512-l/wI1o9qHoJWshef57ygLo88P3UCCNaq8xToo7n4Ee1bqyofBkKrf61kcbBoOw0Arx3aqxPtJJFPov/npzBX4g==",
-      "storePath": "oh_modules/.ohpm/@tencentcloud+cos@1.2.1",
+    "@tencentcloud/cos@file:cosTransferPractice/cosSdk-1.2.2.har": {
+      "storePath": "oh_modules/.ohpm/@tencentcloud+cos@flbnwq4cbvwrbtxum8ihcprftdoia438mokxk0jdoxi=",
       "dependencies": {
-        "@tencentcloud/foundation": "cosSdk/foundation120.har"
+        "@tencentcloud/foundation": "cosSdk/foundation122.har"
       },
       "dynamicDependencies": {},
       "dev": false,

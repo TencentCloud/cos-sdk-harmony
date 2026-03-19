@@ -255,6 +255,8 @@ export class CosXmlBaseService {
         task.priority = cosXmlRequest.priority;
         task.retry = new RetryHandler(this.cosXmlServiceConfig.maxRetryCount, this.cosXmlServiceConfig.retrySleep);
         cosXmlRequest.taskId = task.taskId;
+        // 将 task 引用赋值给 request，用于获取重试信息等
+        cosXmlRequest.httpTask = task;
         // task设置回调
         task.onHeaderReceive = (header: Record<string, string>) => {
           let callbackHeaderReceive = cosXmlRequest.onHeaderReceive;

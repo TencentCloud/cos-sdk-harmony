@@ -4,7 +4,7 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { resourceManager } from '@kit.LocalizationKit';
 import { util } from '@kit.ArkTS';
-import { CosXmlBaseService, CosXmlServiceConfig } from '../../../../Index';
+import { CosXmlBaseService, CosXmlServiceConfig, QCloudLogger } from '../../../../Index';
 import { TestConst } from '../test/common/TestConst';
 import { Credential } from '../test/common/Credential';
 import { TestUtils } from '../test/common/TestUtils';
@@ -17,6 +17,9 @@ let tag: string = 'testTag';
 async function onAbilityCreateCallback(data: UIAbility) {
   hilog.info(0x0000, 'testTag', 'onAbilityCreateCallback, data: ${}', JSON.stringify(data));
   CosXmlBaseService.setDebuggable(true);
+  // QCloudLogger.logOutputCallback = (log)=>{
+  //   console.log("logOutputCallback" + log);
+  // }
   // 初始化默认cos service
   CosXmlBaseService.initDefaultService(
     TestUtils.getContext(),

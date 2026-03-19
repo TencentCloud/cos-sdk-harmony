@@ -152,54 +152,125 @@ export  class QCloudQueue {
     }
   }
 
-  private needRetry(data:QCloudTransferData,task:QCloudTask):boolean{
-    if (data.error && task.shouldRetry(data.error)){
-      return true;
+  private markHostSwitched(task: QCloudTask): boolean {
+    // 如果已经切换过域名，不再切换
+    if (task.retry.isHostSwitched()) {
+      return false;
     }
-    if (data.eventType === QCloudEventType.netError && task.retry.shouldRetry()){
-      return true;
+
+    // 只有 QCloudHTTPTask 才支持域名切换
+    if (!(task instanceof QCloudHTTPTask)) {
+      return false;
     }
-    if (data.eventType === QCloudEventType.finish && (data.result as number) >= 500 && task.retry.shouldRetry()){
-      return true;
+
+    const httpTask = task as QCloudHTTPTask<Object>;
+
+    // 检查是否禁用了备用域名
+    if (httpTask.httpRequest.disableBackupHost) {
+      return false;
     }
-    if (task instanceof QCloudHTTPTask){
-      if (data.eventType === QCloudEventType.finish && (data.result as number) >= 300 && (data.result as number) < 400 && task.httpResponse && task.httpResponse.headers && task.httpResponse.headers["x-cos-request-id"] === undefined && task.retry.shouldRetry()) {
+
+    // 使用 HttpRequest 的 needChangeHost 方法检查域名是否支持切换
+    let canSwitch = httpTask.httpRequest.needChangeHost(httpTask.httpRequest.host);
+    if (canSwitch) {
+      task.retry.markHostSwitched();
+    }
+    return canSwitch;
+  }
+
+  private needRetry(data: QCloudTransferData, task: QCloudTask): boolean {
+    if (data.error || data.eventType === QCloudEventType.netError){
+      if (task.retry.shouldRetry()) {
+        if(task.retry.isLastRetry()){
+          this.markHostSwitched(task);
+        }
         return true;
+      } else {
+        return false;
+      }
+    }
+    // 处理 HTTP 响应状态码
+    if (data.eventType === QCloudEventType.finish) {
+      const statusCode = data.result as number;
+
+      // 2XX：成功，不重试不切换
+      if (statusCode >= 200 && statusCode < 300) {
+        return false;
+      }
+
+      // 3XX：不重试，满足条件时切换域名
+      if (statusCode >= 300 && statusCode < 400) {
+        if (task.retry.shouldRetry()) {
+          // 标记最大重试次数，避免再次重试
+          task.retry.markMaxCount();
+          const httpTask = task as QCloudHTTPTask<Object>;
+          if (httpTask.httpResponse && httpTask.httpResponse.headers &&
+            httpTask.httpResponse.headers["x-cos-request-id"] === undefined) {
+            return this.markHostSwitched(task);
+          }
+          return false;
+        } else {
+          return false;
+        }
+      }
+
+      // 4XX：客户端错误，不重试不切换
+      if (statusCode >= 400 && statusCode < 500) {
+        return false;
+      }
+
+      // 5XX：服务端错误，先重试，最后一次尝试切换域名
+      if (statusCode >= 500) {
+        if (task.retry.shouldRetry()) {
+          if(task.retry.isLastRetry()){
+            const httpTask = task as QCloudHTTPTask<Object>;
+            if (httpTask.httpResponse && httpTask.httpResponse.headers &&
+              httpTask.httpResponse.headers["x-cos-request-id"] === undefined) {
+              this.markHostSwitched(task);
+            }
+          }
+          return true;
+        } else {
+          return false;
+        }
       }
     }
     return false;
   }
 
-  public taskReceiveData(taskId:number,data:QCloudTransferData){
+  public taskReceiveData(taskId: number, data: QCloudTransferData) {
     let task = this.getRunningTask(taskId);
     if (!task) {
       return;
     }
+
     if (this.needRetry(data,task)){
-      setTimeout(()=>{
+      setTimeout(() => {
         task?.retry.retry();
         if (task) {
           this.runingTaskQueue.remove(task);
           task.reset();
           this.heighWaitTaskQueue.add(task);
-          QCloudLogger.log(`retryTask:${task.taskId}`,'cos_sdk_task_manager_log');
+          QCloudLogger.log(`retryTask:${task.taskId}`, 'cos_sdk_task_manager_log');
           this._logState();
-          this.startTask()
+          this.startTask();
         }
-      },task.retry.sleep);
-    }else{
-      if (data.eventType == QCloudEventType.finish || data.eventType == QCloudEventType.taskError || data.eventType == QCloudEventType.cancel) {
+      }, task.retry.sleep);
+    } else {
+      if (data.eventType == QCloudEventType.finish || data.eventType == QCloudEventType.taskError ||
+          data.eventType == QCloudEventType.cancel || data.eventType == QCloudEventType.netError) {
         if (data.eventType == QCloudEventType.cancel) {
           task.state = QCloudTaskState.Cancel;
         }
-        if (data.eventType == QCloudEventType.finish || data.eventType == QCloudEventType.taskError) {
+        if (data.eventType == QCloudEventType.finish || data.eventType == QCloudEventType.taskError ||
+            data.eventType == QCloudEventType.netError) {
           task.state = QCloudTaskState.Finish;
         }
-        QCloudLogger.log(`removeTask:${task.taskId}`,'cos_sdk_task_manager_log');
+        QCloudLogger.log(`removeTask:${task.taskId}`, 'cos_sdk_task_manager_log');
         task.onTaskReceiveData(data);
         this.runingTaskQueue.remove(task);
         this.startTask();
-      }else{
+      } else {
         task.onTaskReceiveData(data);
       }
     }
