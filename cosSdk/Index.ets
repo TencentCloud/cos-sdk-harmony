@@ -132,6 +132,10 @@ export { DeleteObjectTagRequest } from './src/main/ets/model/object/DeleteObject
 
 export { DeleteObjectTagResult } from './src/main/ets/model/object/DeleteObjectTagResult'
 
+export { RestoreObjectRequest } from './src/main/ets/model/object/RestoreObjectRequest'
+
+export { RestoreObjectResult } from './src/main/ets/model/object/RestoreObjectResult'
+
 export { QCloudCredential,
   HttpRequest,
   HttpProgress,

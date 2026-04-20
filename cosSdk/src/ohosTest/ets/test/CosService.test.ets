@@ -17,6 +17,7 @@ import {
   PutBucketTagRequest,
   PutObjectRequest,
   PutObjectTagRequest,
+  RestoreObjectRequest,
   TagObject,
   UploadTask
 } from '../../../../Index';
@@ -599,6 +600,85 @@ export default function cosServiceTest(cosXmlBaseService: CosXmlBaseService) {
         expect().assertFail();
       }
       done();
+    })
+
+    it('restoreObject', 0, async (done: Function) => {
+      // 先上传一个归档存储类型的对象
+      let archiveCosPath = `uploadTest/UT/restoreArchiveObject`;
+      let filePath = FileUtils.getFile(1024, 'restoreArchive');
+      let putRequest = new PutObjectRequest(TestConst.PERSIST_BUCKET, archiveCosPath, filePath);
+      putRequest.addHeader('x-cos-storage-class', 'ARCHIVE');
+      await TestUtils.requestAddCredential(putRequest, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      let task: UploadTask = TestUtils.getCosXmlBaseService(cosXmlBaseService).upload(putRequest);
+      task.onResult = {
+        onSuccess: async (request, result) => {
+          Logger.info(`restoreObject upload success`);
+          // 上传成功后，恢复该归档对象
+          let restoreRequest = new RestoreObjectRequest(TestConst.PERSIST_BUCKET, archiveCosPath);
+          restoreRequest.days = 1;
+          restoreRequest.tier = 'Expedited';
+          await TestUtils.requestAddCredential(restoreRequest, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+          try {
+            let restoreResult = await TestUtils.getCosXmlBaseService(cosXmlBaseService).restoreObject(restoreRequest)
+            Logger.info(restoreResult)
+            if (restoreResult.httpCode && restoreResult.httpCode >= 200 && restoreResult.httpCode < 300) {
+              expect(true).assertTrue();
+            } else {
+              expect().assertFail();
+            }
+          } catch (e) {
+            TestUtils.printError(e);
+            expect().assertFail();
+          }
+          done();
+        },
+        onFail: (request, error) => {
+          Logger.info(`restoreObject upload fail`);
+          Logger.info(error);
+          expect().assertFail();
+          done();
+        }
+      }
+      task.start();
+    })
+
+    it('restoreObjectWithoutTier', 0, async (done: Function) => {
+      // 先上传一个归档存储类型的对象
+      let archiveCosPath = `uploadTest/UT/restoreArchiveObjectNoTier`;
+      let filePath = FileUtils.getFile(1024, 'restoreArchiveNoTier');
+      let putRequest = new PutObjectRequest(TestConst.PERSIST_BUCKET, archiveCosPath, filePath);
+      putRequest.addHeader('x-cos-storage-class', 'ARCHIVE');
+      await TestUtils.requestAddCredential(putRequest, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+      let task: UploadTask = TestUtils.getCosXmlBaseService(cosXmlBaseService).upload(putRequest);
+      task.onResult = {
+        onSuccess: async (request, result) => {
+          Logger.info(`restoreObjectWithoutTier upload success`);
+          // 上传成功后，恢复该归档对象（不指定恢复模式，使用默认 Standard）
+          let restoreRequest = new RestoreObjectRequest(TestConst.PERSIST_BUCKET, archiveCosPath);
+          restoreRequest.days = 3;
+          await TestUtils.requestAddCredential(restoreRequest, TestUtils.getCosXmlBaseService(cosXmlBaseService));
+          try {
+            let restoreResult = await TestUtils.getCosXmlBaseService(cosXmlBaseService).restoreObject(restoreRequest)
+            Logger.info(restoreResult)
+            if (restoreResult.httpCode && restoreResult.httpCode >= 200 && restoreResult.httpCode < 300) {
+              expect(true).assertTrue();
+            } else {
+              expect().assertFail();
+            }
+          } catch (e) {
+            TestUtils.printError(e);
+            expect().assertFail();
+          }
+          done();
+        },
+        onFail: (request, error) => {
+          Logger.info(`restoreObjectWithoutTier upload fail`);
+          Logger.info(error);
+          expect().assertFail();
+          done();
+        }
+      }
+      task.start();
     })
 
     // it('cdnDomain', 0, async (done: Function) => {

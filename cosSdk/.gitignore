@@ -4,3 +4,4 @@
 /build
 /.cxx
 /.test
+/src/ohosTest/ets/test/common/TestConst.ets

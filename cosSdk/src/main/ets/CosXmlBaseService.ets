@@ -66,6 +66,8 @@ import { GetBucketTagResult } from './model/bucket/GetBucketTagResult';
 import { DeleteObjectTagResult } from './model/object/DeleteObjectTagResult';
 import { DeleteObjectTagRequest } from './model/object/DeleteObjectTagRequest';
 import { GetObjectTagRequest, GetObjectTagResult, PutBucketTagResult } from '../../../Index';
+import { RestoreObjectRequest } from './model/object/RestoreObjectRequest';
+import { RestoreObjectResult } from './model/object/RestoreObjectResult';
 import { JSON } from '@kit.ArkTS';
 import { rcp } from '@kit.RemoteCommunicationKit';
 
@@ -375,6 +377,11 @@ export class CosXmlBaseService {
 
   public async deleteObjectTag(request: DeleteObjectTagRequest): Promise<DeleteObjectTagResult> {
     let result = await this.execute(request, new DeleteObjectTagResult());
+    return result;
+  }
+
+  public async restoreObject(request: RestoreObjectRequest): Promise<RestoreObjectResult> {
+    let result = await this.execute(request, new RestoreObjectResult());
     return result;
   }
 
