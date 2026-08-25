@@ -168,7 +168,13 @@ export class Content{
    */
   restoreStatus?:string;
 
-  constructor(key?:string,lastModified?:string,eTag?:string,size?:number,owner?:Owner,storageTier?:string,restoreStatus?:string) {
+  /**
+   * 对象存储类型，例如 STANDARD、STANDARD_IA、INTELLIGENT_TIERING、ARCHIVE、DEEP_ARCHIVE 等。
+   * 详见 https://cloud.tencent.com/document/product/436/33417
+   */
+  storageClass?:string;
+
+  constructor(key?:string,lastModified?:string,eTag?:string,size?:number,owner?:Owner,storageTier?:string,restoreStatus?:string,storageClass?:string) {
     this.key = key;
     this.lastModified = lastModified;
     this.eTag = eTag;
@@ -176,6 +182,7 @@ export class Content{
     this.owner = owner;
     this.storageTier = storageTier;
     this.restoreStatus = restoreStatus;
+    this.storageClass = storageClass;
   }
 
   public static initWithJson(json:object):Content{
@@ -189,6 +196,7 @@ export class Content{
       result.owner = owner;
       result.storageTier = json['storageTier'];
       result.restoreStatus = json['restoreStatus'];
+      result.storageClass = json['storageClass'];
     }
     return result;
   }

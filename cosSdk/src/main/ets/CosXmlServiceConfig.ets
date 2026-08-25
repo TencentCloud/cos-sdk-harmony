@@ -1,4 +1,5 @@
 import { rcp } from "@kit.RemoteCommunicationKit";
+import { NetworkClient } from "@tencentcloud/foundation";
 import { CosInvalidArgumentError } from "./error/CosInvalidArgumentError";
 
 export class CosXmlServiceConfig {
@@ -97,6 +98,20 @@ export class CosXmlServiceConfig {
   progressGranularity: number = 500;
 
   disableBackupHost:boolean = false;
+
+  /**
+   * 自定义网络层。
+   *
+   * 不设置时（默认），SDK 使用基于 HarmonyOS RemoteCommunicationKit（rcp）的默认网络实现，
+   * 行为与旧版本完全一致，老客户无需任何改动。
+   *
+   * 如需接管网络通信（使用自研网络库、DNS 优化、弱网优化等），可继承 NetworkClient 并在此设置。
+   * 详见 NetworkClient / NetworkProxy。
+   *
+   *   let config = new CosXmlServiceConfig("ap-guangzhou");
+   *   config.networkClient = new MyNetworkClient();
+   */
+  networkClient?: NetworkClient;
 
   constructor(region?: string) {
     this.region = region;

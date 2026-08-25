@@ -1,21 +1,21 @@
 {
   "app": {
     "signingConfigs": [
+      //storePassword和keyPassword为ACC904E822A1728B6C85FF3C480C9B37
+      // release发布的时候配置（流水线）
       {
         "name": "debug",
         "type": "HarmonyOS",
         "material": {
-          "storeFile": "./debugSign/cossdk.p12",
-          "storePassword": "00000030A7D6DCDB00C92D76F1661F17AB6D142766304DCDA6A3C23EF455334A9E0DD459EA796B0F99659238F8477ECFBB86B82F0C85450A99FBFFD6C38B0A3C",
-          "keyAlias": "cossdk",
-          "keyPassword": "00000030DDA8CA8AA901E4D7B636501C0E73ACD2423689C0574D3268F541649EA7F7B3629EBCAA84D78A9EF3F22564629196A572947552180FE7398E39924274",
+          "certpath": "/Users/jordanqin/.ohos/config/debug_QCloudCosXml_t_D1xZJ4x6wqS1jzmtuwxlBTwt1SBugAetgBaYc9sUo=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001BCCF7BED89690C678B23128F0802DF523A86E6BCFB185C8ECEED73D2CE5575B46FDCEDDAF8D37B1",
+          "profile": "/Users/jordanqin/.ohos/config/debug_QCloudCosXml_t_D1xZJ4x6wqS1jzmtuwxlBTwt1SBugAetgBaYc9sUo=.p7b",
           "signAlg": "SHA256withECDSA",
-          "profile": "./debugSign/cossdkDebug.p7b",
-          "certpath": "./debugSign/cossdk.cer"
+          "storeFile": "/Users/jordanqin/.ohos/config/debug_QCloudCosXml_t_D1xZJ4x6wqS1jzmtuwxlBTwt1SBugAetgBaYc9sUo=.p12",
+          "storePassword": "0000001BF079741C07CBB8033F1CA47A1CCB91E938CC663F0F4BCFEC373E8063CF143A52BD48877EC2E685"
         }
       }
-      //storePassword和keyPassword为ACC904E822A1728B6C85FF3C480C9B37
-      // release发布的时候配置（流水线）
     ],
     "products": [
       {

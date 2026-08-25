@@ -10,7 +10,10 @@ import {
   RetryHandler,
   QCloudSignatureBuilder,
   SelfSignCallBack,
-  QCloudSessionManager
+  QCloudSessionManager,
+  HarmonyNetworkClient,
+  NetworkClient,
+  NetworkClientConfig
 } from '@tencentcloud/foundation';
 import { CosXmlRequest } from './model/CosXmlRequest';
 import { CosXmlResult } from './model/CosXmlResult';
@@ -68,6 +71,20 @@ import { DeleteObjectTagRequest } from './model/object/DeleteObjectTagRequest';
 import { GetObjectTagRequest, GetObjectTagResult, PutBucketTagResult } from '../../../Index';
 import { RestoreObjectRequest } from './model/object/RestoreObjectRequest';
 import { RestoreObjectResult } from './model/object/RestoreObjectResult';
+import { PutBucketRequest } from './model/bucket/PutBucketRequest';
+import { PutBucketResult } from './model/bucket/PutBucketResult';
+import { DeleteBucketRequest } from './model/bucket/DeleteBucketRequest';
+import { DeleteBucketResult } from './model/bucket/DeleteBucketResult';
+import { PutBucketAccelerateRequest } from './model/bucket/PutBucketAccelerateRequest';
+import { PutBucketAccelerateResult } from './model/bucket/PutBucketAccelerateResult';
+import { GetBucketAccelerateRequest } from './model/bucket/GetBucketAccelerateRequest';
+import { GetBucketAccelerateResult } from './model/bucket/GetBucketAccelerateResult';
+import { PutBucketVersioningRequest } from './model/bucket/PutBucketVersioningRequest';
+import { PutBucketVersioningResult } from './model/bucket/PutBucketVersioningResult';
+import { GetBucketVersioningRequest } from './model/bucket/GetBucketVersioningRequest';
+import { GetBucketVersioningResult } from './model/bucket/GetBucketVersioningResult';
+import { GetBucketLocationRequest } from './model/bucket/GetBucketLocationRequest';
+import { GetBucketLocationResult } from './model/bucket/GetBucketLocationResult';
 import { JSON } from '@kit.ArkTS';
 import { rcp } from '@kit.RemoteCommunicationKit';
 
@@ -155,6 +172,11 @@ export class CosXmlBaseService {
    */
   public readonly credentialCallBack?: CredentialCallBack;
   private selfSignCallBack?: SelfSignCallBack;
+  /**
+   * 网络客户端：一个 service 初始化一次并全局复用；每次请求通过 getNetworkProxy() 获取执行代理。
+   * 未配置自定义实现时使用默认 rcp 实现。
+   */
+  private readonly networkClient: NetworkClient;
 
   /**
    * 设置自签名回调
@@ -167,6 +189,10 @@ export class CosXmlBaseService {
     this.context = context;
     this.cosXmlServiceConfig = cosXmlServiceConfig;
     this.credentialCallBack = credentialCallBack;
+    // 初始化网络客户端（一次）：未配置自定义实现时使用默认 rcp 实现
+    this.networkClient = cosXmlServiceConfig.networkClient ?? new HarmonyNetworkClient();
+    this.networkClient.init(new NetworkClientConfig(cosXmlServiceConfig.connectTimeout,
+      cosXmlServiceConfig.readTimeout, CosXmlBaseService.isDebuggable));
     QCloudTaskManager.manager().setDownloadConcurrentCount(cosXmlServiceConfig.downloadMaxConcurrentCount);
     QCloudTaskManager.manager().setUploadConcurrentCount(cosXmlServiceConfig.uploadMaxConcurrentCount);
   }
@@ -256,6 +282,8 @@ export class CosXmlBaseService {
         let task: QCloudHTTPTask<T2> = new QCloudHTTPTask(qcloudHttpRequest);
         task.priority = cosXmlRequest.priority;
         task.retry = new RetryHandler(this.cosXmlServiceConfig.maxRetryCount, this.cosXmlServiceConfig.retrySleep);
+        // 复用 service 级网络客户端（构造时已初始化一次）
+        task.networkClient = this.networkClient;
         cosXmlRequest.taskId = task.taskId;
         // 将 task 引用赋值给 request，用于获取重试信息等
         cosXmlRequest.httpTask = task;
@@ -445,6 +473,41 @@ export class CosXmlBaseService {
 
   public async getBucketObjectVersions(request: GetBucketObjectVersionsRequest): Promise<GetBucketObjectVersionsResult> {
     let result = await this.execute(request, new GetBucketObjectVersionsResult());
+    return result;
+  }
+
+  public async putBucket(request: PutBucketRequest): Promise<PutBucketResult> {
+    let result = await this.execute(request, new PutBucketResult());
+    return result;
+  }
+
+  public async deleteBucket(request: DeleteBucketRequest): Promise<DeleteBucketResult> {
+    let result = await this.execute(request, new DeleteBucketResult());
+    return result;
+  }
+
+  public async putBucketAccelerate(request: PutBucketAccelerateRequest): Promise<PutBucketAccelerateResult> {
+    let result = await this.execute(request, new PutBucketAccelerateResult());
+    return result;
+  }
+
+  public async getBucketAccelerate(request: GetBucketAccelerateRequest): Promise<GetBucketAccelerateResult> {
+    let result = await this.execute(request, new GetBucketAccelerateResult());
+    return result;
+  }
+
+  public async putBucketVersioning(request: PutBucketVersioningRequest): Promise<PutBucketVersioningResult> {
+    let result = await this.execute(request, new PutBucketVersioningResult());
+    return result;
+  }
+
+  public async getBucketVersioning(request: GetBucketVersioningRequest): Promise<GetBucketVersioningResult> {
+    let result = await this.execute(request, new GetBucketVersioningResult());
+    return result;
+  }
+
+  public async getBucketLocation(request: GetBucketLocationRequest): Promise<GetBucketLocationResult> {
+    let result = await this.execute(request, new GetBucketLocationResult());
     return result;
   }
 

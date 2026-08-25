@@ -1,0 +1,23 @@
+{
+  "name": "cos-mock-server",
+  "version": "1.0.0",
+  "description": "Mock HTTP Server for COS/CI SDK network proxy testing",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js"
+  },
+  "keywords": [
+    "mock",
+    "http",
+    "server",
+    "cos",
+    "ci",
+    "testing"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

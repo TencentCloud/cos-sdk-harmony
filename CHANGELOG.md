@@ -1,3 +1,12 @@
+## 1.2.5
+- 新增 8 个 Bucket 级接口：PutBucket、DeleteBucket、Put/GetBucketAccelerate、Put/GetBucketVersioning、GetBucketLocation
+- 新增传输状态回调 `TransferTask.onState`
+- 其他传输逻辑完善
+
+## 1.2.4
+- 支持自定义网络层
+- 解决严格模式下部分类型导出问题
+
 ## 1.2.3
 - 增加恢复归档对象的功能
 

@@ -4,7 +4,6 @@ import { QCloudLogger } from '../../logger/QCloudLogger';
 import { QCloudEventType, QCloudPriority, QCloudTask, QCloudTaskState } from '../base/QCloudTask'
 import { QCloudTransferData } from '../base/QCloudTransferData';
 import { QCloudHTTPTask } from '../http/QCloudHTTPTask';
-import { TaskHTTPExecuteFunc } from '../http/TaskHTTPExecuteFunc';
 import { QCloudTaskManager } from '../QCloudTaskManager';
 
 
@@ -129,15 +128,18 @@ export  class QCloudQueue {
         return;
       }
       try {
-        TaskHTTPExecuteFunc(task.getRequestData())
+        // 若在构建请求期间已被取消，则不再发起网络请求，直接结束
         if (task.state === QCloudTaskState.Cancel) {
           task.onTaskReceiveData(new QCloudTransferData(QCloudEventType.cancel,null,null))
           this.runingTaskQueue.remove(task);
-        }else{
-          QCloudLogger.log(`startTask:${task.taskId}`,'cos_sdk_task_manager_log');
-          this._logState();
-          task.state = QCloudTaskState.Process;
+          this.startTask();
+          return;
         }
+        // 先迁移到 Process 再发起网络，避免自定义网络层同步回调时状态被覆盖
+        task.state = QCloudTaskState.Process;
+        QCloudLogger.log(`startTask:${task.taskId}`,'cos_sdk_task_manager_log');
+        this._logState();
+        task.startNetworkExecute()
       } catch (e) {
         this.taskReceiveData(task.taskId,new QCloudTransferData(QCloudEventType.taskError,null,e));
       }

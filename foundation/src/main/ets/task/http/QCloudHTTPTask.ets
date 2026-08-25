@@ -16,12 +16,25 @@ import { QCloudAuthenticationError } from '../../error/QCloudAuthenticationError
 import { QCloudLogger } from '../../logger/QCloudLogger';
 import { HttpHeader } from '../../net/HttpConstants';
 import { rcp } from '@kit.RemoteCommunicationKit';
+import { NetworkClient } from '../../net/NetworkClient';
+import { NetworkProxy } from '../../net/NetworkProxy';
+import { HarmonyNetworkClient } from '../../net/HarmonyNetworkClient';
+import { QCloudResponseHandler } from '../../net/QCloudResponseHandler';
+import { CustomNetworkRequest } from '../../net/CustomNetworkRequest';
 
 export class QCloudHTTPTask<T> extends QCloudTask {
   private readonly TAG = "HTTP";
   httpRequest:QCloudHttpRequest<T>;
 
   requestData:QCloudRequestData;
+  /** 交给网络层执行的解耦请求数据（由 buildRequestData 构建） */
+  customRequest:CustomNetworkRequest;
+  /** 网络客户端（配置+工厂），默认使用 rcp 实现，可由 CosXmlBaseService 注入自定义实现 */
+  networkClient:NetworkClient = new HarmonyNetworkClient();
+  /** 当次请求的网络执行代理（含重试的每一次执行都会重新获取） */
+  private networkProxy?:NetworkProxy;
+  /** 当次请求的响应回调处理器 */
+  private responseHandler?:QCloudResponseHandler;
   httpResponse: HttpResponse<T>|undefined;
 
   onHeaderReceive: Callback<Record<string, string>> | undefined;
@@ -34,6 +47,7 @@ export class QCloudHTTPTask<T> extends QCloudTask {
     super(TaskHTTPExecuteFunc);
     this.httpRequest = httpRequest;
     this.requestData = new QCloudRequestData();
+    this.customRequest = new CustomNetworkRequest();
   }
 
   async buildRequestData():Promise<boolean>{
@@ -77,7 +91,27 @@ export class QCloudHTTPTask<T> extends QCloudTask {
     this.requestData.requestConfiguration = this.httpRequest.buildRequestConfiguration();
     this.requestData.progressGranularity = this.httpRequest.progressGranularity;
     this.requestData.taskId = this.taskId;
+
+    // 构建交给网络层的解耦请求数据（不含 rcp 类型；rcp 高级配置经 nativeRequestConfiguration 透传给默认实现）
+    this.customRequest.taskId = this.taskId;
+    this.customRequest.method = this.httpRequest.method as string;
+    this.customRequest.url = url;
+    this.customRequest.headers = this.requestData.headers as Record<string, string>;
+    this.customRequest.body = this.requestData.content as ArrayBuffer | string;
+    this.customRequest.connectTimeoutMs = this.httpRequest.connectTimeout;
+    this.customRequest.readTimeoutMs = this.httpRequest.readTimeout;
+    this.customRequest.nativeRequestConfiguration = this.requestData.requestConfiguration;
     return true;
+  }
+
+  /**
+   * 通过网络层执行请求：获取网络代理与响应处理器，发起请求。
+   * 由队列在 buildRequestData 完成后调用。含重试的每一次执行都会重新获取网络代理。
+   */
+  public startNetworkExecute(): void {
+    this.responseHandler = new QCloudResponseHandler(this.taskId, this.requestData.progressGranularity);
+    this.networkProxy = this.networkClient.getNetworkProxy();
+    this.networkProxy.executeHttpRequest(this.customRequest, this.responseHandler);
   }
 
   public onTaskReceiveData(data: QCloudTransferData): void {
@@ -192,11 +226,14 @@ export class QCloudHTTPTask<T> extends QCloudTask {
 
   public cancel(){
     super.cancel();
-    let event: emitter.InnerEvent = {
-      eventId: this.taskId + QCloudTask.K_CANCEL_EVENT_BASE,
-      priority: emitter.EventPriority.HIGH
-    };
-    emitter.emit(event);
+    // 先让 SDK 进入取消终态：保证底层 cancel 触发的失败回调（部分网络库 cancel 会同步/异步回调 onFailure）
+    // 被响应处理器忽略，避免用户主动取消被当成网络错误而触发重试。
+    this.responseHandler?.emitCancel();
+    try {
+      this.networkProxy?.cancel();
+    } catch (e) {
+      // 已进入取消终态，忽略底层 cancel 抛出的异常
+    }
   }
 
   public reset(): void {

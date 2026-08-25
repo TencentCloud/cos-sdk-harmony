@@ -2,8 +2,8 @@
   "app": {
     "bundleName": "com.tencent.cosdemo",
     "vendor": "example",
-    "versionCode": 1010203,
-    "versionName": "1.2.3",
+    "versionCode": 1010205,
+    "versionName": "1.2.5",
     "icon": "$media:app_icon",
     "label": "$string:app_name"
   }

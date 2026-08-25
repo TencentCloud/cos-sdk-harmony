@@ -1,7 +1,7 @@
 import { HttpHeader, HttpProgress, HttpUtils, QCloudLogger, QCloudUserCancelError } from '@tencentcloud/foundation';
 import { CosXmlBaseService } from '../CosXmlBaseService';
 import { GetObjectRequest } from '../model/object/GetObjectRequest';
-import { TransferTask } from './TransferTask';
+import { TransferState, TransferTask } from './TransferTask';
 import dataPreferences from '@ohos.data.preferences';
 import { HeadObjectRequest } from '../model/object/HeadObjectRequest';
 import { CosXmlResult } from '../model/CosXmlResult';
@@ -101,41 +101,53 @@ export class DownloadTask extends TransferTask<GetObjectRequest, CosXmlDownloadT
 
   start(): void {
     try {
+      this.updateState(TransferState.Processing);
       this.headObject();
     } catch (e) {
+      this.updateState(TransferState.Error);
       this.onFail(this.request, e);
     }
   }
 
   pause(): void {
     try {
+      this.updateState(TransferState.Pause);
       this.onFail(this.request, new CosTransferPauseError())
       this.cancelAllRequest();
     } catch (e) {
+      this.updateState(TransferState.Error);
       this.onFail(this.request, e);
     }
   }
 
   resume(): void {
     try {
+      // pause() 已置位失败标记，此处复位，保证恢复后的真实失败仍能通知外部
+      this.resetFailedFlag();
       this.start();
     } catch (e) {
+      this.markErrorIfActive();
       this.onFail(this.request, e);
     }
   }
 
   async cancel(): Promise<void> {
     try {
+      this.updateState(TransferState.Canceled);
       this.cancelAllRequest();
       await this.clear();
       this.onFail(this.request, new QCloudUserCancelError())
     } catch (e) {
+      this.updateState(TransferState.Error);
       this.onFail(this.request, e);
     }
   }
 
   private async headObject() {
     this.headObjectRequest = new HeadObjectRequest(this.objectRequest.bucket!, this.objectRequest.cosPath);
+    // 必须继承原请求的 region，否则会回落到 config.region，
+    // 使「per-request region」语义失效（跨地域下载会 404 NoSuchBucket/NoSuchKey）。
+    this.headObjectRequest.region = this.objectRequest.region;
     this.headObjectRequest.addHeaders(this.objectRequest.getHeaders());
     this.headObjectRequest.addQueries(this.objectRequest.getQueries());
     this.headObjectRequest.addNoSignHeaderKeys(this.objectRequest.noSignHeaderKeys);
@@ -154,20 +166,26 @@ export class DownloadTask extends TransferTask<GetObjectRequest, CosXmlDownloadT
     }
     try {
       let headObjectResult = await this.cosXmlBaseService.headObject(this.headObjectRequest);
+      let taskKey = await this.getTaskKey();
       let absolutePath = await this.hasExisted();
+      QCloudLogger.debug(`[headObject] taskKey=${taskKey} hasExisted=${absolutePath ? 'true' : 'false'} eTag=${this.eTag} contentLength=${contentLength}`, 'DownloadTask');
       if (absolutePath) {
         if (await fs.access(this.localSavePath)) {
           let fileLength = (await fs.stat(this.localSavePath)).size;
+          QCloudLogger.debug(`[headObject] localFile exists fileLength=${fileLength} rangeStart=${this.rangeStart} rangeEnd=${this.rangeEnd} fileOffset=${this.fileOffset}`, 'DownloadTask');
           if (contentLength && Number(contentLength) === fileLength) {
+            QCloudLogger.debug(`[headObject] file already complete, skip download`, 'DownloadTask');
             let onProgress = this.onProgress;
             if (onProgress) {
               onProgress(new HttpProgress(fileLength, fileLength));
             }
+            this.updateState(TransferState.Success);
             this.onSuccess(this.request, this.buildCosXmlTaskResult(headObjectResult));
             await this.clear();
             return;
           } else {
             this.hasWriteDataLen = fileLength - this.fileOffset;
+            QCloudLogger.debug(`[headObject] resume download hasWriteDataLen=${this.hasWriteDataLen} newRangeStart=${this.rangeStart + this.hasWriteDataLen} newFileOffset=${this.fileOffset + this.hasWriteDataLen}`, 'DownloadTask');
             this.realDownload(this.rangeStart + this.hasWriteDataLen, this.rangeEnd,
               this.fileOffset + this.hasWriteDataLen);
             return;
@@ -175,6 +193,7 @@ export class DownloadTask extends TransferTask<GetObjectRequest, CosXmlDownloadT
         }
       }
       // 第一次下载文件，会先删除本地文件
+      QCloudLogger.debug(`[headObject] first download (no valid resume record), delete local file if exists`, 'DownloadTask');
       if (await fs.access(this.localSavePath)) {
         await fs.unlink(this.localSavePath)
       }
@@ -182,6 +201,9 @@ export class DownloadTask extends TransferTask<GetObjectRequest, CosXmlDownloadT
       this.hasWriteDataLen = 0;
       this.realDownload(this.rangeStart, this.rangeEnd, this.fileOffset);
     } catch (err) {
+      // pause()/cancel() 会取消在途请求并走到这里，此时状态已是 Pause/Canceled，
+      // 不应再覆写为 Error（否则暂停会被误报为失败）。
+      this.markErrorIfActive();
       this.onFail(this.request, err)
       this.cancelAllRequest();
     }
@@ -191,6 +213,8 @@ export class DownloadTask extends TransferTask<GetObjectRequest, CosXmlDownloadT
     this.getObjectRequest =
       new GetObjectRequest(this.objectRequest.bucket!, this.objectRequest.cosPath, this.localSavePath);
     this.getObjectRequest.fileOffset = fileOffset;
+    // 同 headObject()：必须继承原请求的 region
+    this.getObjectRequest.region = this.objectRequest.region;
     this.getObjectRequest.addHeaders(this.objectRequest.getHeaders());
     this.getObjectRequest.addQueries(this.objectRequest.getQueries());
     this.getObjectRequest.addNoSignHeaderKeys(this.objectRequest.noSignHeaderKeys);
@@ -212,9 +236,11 @@ export class DownloadTask extends TransferTask<GetObjectRequest, CosXmlDownloadT
     }
     try {
       let getObjectResult = await this.cosXmlBaseService.getObject(this.getObjectRequest);
+      this.updateState(TransferState.Success);
       this.onSuccess(this.request, this.buildCosXmlTaskResult(getObjectResult));
       await this.clear();
     } catch (err) {
+      this.markErrorIfActive();
       this.onFail(this.request, err)
       this.cancelAllRequest();
     }
@@ -232,8 +258,12 @@ export class DownloadTask extends TransferTask<GetObjectRequest, CosXmlDownloadT
   }
 
   private async getTaskKey(): Promise<string> {
+    // 断点记录的 key 必须与「实际生效的 region」一致：per-request region 优先，否则回落 config.region。
+    // 原来直接用 config.region，当请求带了不同 region 时，不同地域的下载会碰撞出同一个 taskKey，
+    // 互相覆盖断点记录，导致断点续传失效（从 0 重新下载）。
+    let region = this.objectRequest.region ?? this.cosXmlBaseService.cosXmlServiceConfig.region;
     let stringBuffer = `download_
-                        ${this.cosXmlBaseService.cosXmlServiceConfig.region}_
+                        ${region}_
                         ${this.objectRequest.bucket}_
                         ${this.objectRequest.cosPath}_
                         ${this.rangeStart}_

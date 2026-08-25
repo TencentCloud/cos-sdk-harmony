@@ -4,7 +4,9 @@ export { CosXmlBaseService } from './src/main/ets/CosXmlBaseService'
 
 export { CosXmlServiceConfig } from './src/main/ets/CosXmlServiceConfig'
 
-export { TransferResultListener } from './src/main/ets/transfer/TransferTask'
+export type { TransferResultListener } from './src/main/ets/transfer/TransferTask'
+
+export { TransferState } from './src/main/ets/transfer/TransferTask'
 
 export { CosXmlRequest } from './src/main/ets/model/CosXmlRequest'
 
@@ -60,6 +62,8 @@ export { ListBucketsRequest } from './src/main/ets/model/bucket/ListBucketsReque
 
 export { ListBucketsResult, ListBuckets, Bucket } from './src/main/ets/model/bucket/ListBucketsResult'
 
+export { HeadBucketRequest } from './src/main/ets/model/bucket/HeadBucketRequest'
+
 export { HeadBucketResult } from './src/main/ets/model/bucket/HeadBucketResult'
 
 export { ListObjectsRequest } from './src/main/ets/model/object/ListObjectsRequest'
@@ -80,7 +84,7 @@ export { PutObjectRequest } from './src/main/ets/model/object/PutObjectRequest'
 
 export { PutObjectResult } from './src/main/ets/model/object/PutObjectResult'
 
-export { TransferRequest } from './src/main/ets/model/object/TransferRequest'
+export type { TransferRequest } from './src/main/ets/model/object/TransferRequest'
 
 export { UploadPartRequest } from './src/main/ets/model/object/UploadPartRequest'
 
@@ -120,6 +124,34 @@ export { DeleteBucketTagRequest } from './src/main/ets/model/bucket/DeleteBucket
 
 export { DeleteBucketTagResult } from './src/main/ets/model/bucket/DeleteBucketTagResult'
 
+export { PutBucketRequest } from './src/main/ets/model/bucket/PutBucketRequest'
+
+export { PutBucketResult } from './src/main/ets/model/bucket/PutBucketResult'
+
+export { DeleteBucketRequest } from './src/main/ets/model/bucket/DeleteBucketRequest'
+
+export { DeleteBucketResult } from './src/main/ets/model/bucket/DeleteBucketResult'
+
+export { PutBucketAccelerateRequest } from './src/main/ets/model/bucket/PutBucketAccelerateRequest'
+
+export { PutBucketAccelerateResult } from './src/main/ets/model/bucket/PutBucketAccelerateResult'
+
+export { GetBucketAccelerateRequest } from './src/main/ets/model/bucket/GetBucketAccelerateRequest'
+
+export { GetBucketAccelerateResult, AccelerateConfiguration } from './src/main/ets/model/bucket/GetBucketAccelerateResult'
+
+export { PutBucketVersioningRequest } from './src/main/ets/model/bucket/PutBucketVersioningRequest'
+
+export { PutBucketVersioningResult } from './src/main/ets/model/bucket/PutBucketVersioningResult'
+
+export { GetBucketVersioningRequest } from './src/main/ets/model/bucket/GetBucketVersioningRequest'
+
+export { GetBucketVersioningResult, VersioningConfiguration } from './src/main/ets/model/bucket/GetBucketVersioningResult'
+
+export { GetBucketLocationRequest } from './src/main/ets/model/bucket/GetBucketLocationRequest'
+
+export { GetBucketLocationResult } from './src/main/ets/model/bucket/GetBucketLocationResult'
+
 export { PutObjectTagRequest, TagObject } from './src/main/ets/model/object/PutObjectTagRequest'
 
 export { PutObjectTagResult } from './src/main/ets/model/object/PutObjectTagResult'
@@ -139,9 +171,21 @@ export { RestoreObjectResult } from './src/main/ets/model/object/RestoreObjectRe
 export { QCloudCredential,
   HttpRequest,
   HttpProgress,
-  CredentialCallBack,
   QCloudAuthenticationError,
   QCloudNetError,
   QCloudTaskError,
   QCloudUserCancelError,
   QCloudLogger } from '@tencentcloud/foundation'
+
+// 自定义网络层
+export { NetworkClient,
+  NetworkProxy,
+  NetworkClientConfig,
+  CustomNetworkRequest,
+  HarmonyNetworkClient } from '@tencentcloud/foundation'
+export type { CustomNetworkResponseHandler } from '@tencentcloud/foundation'
+export type { CredentialCallBack } from '@tencentcloud/foundation'
+
+// 凭证缓存：用于主动使本地缓存的临时密钥失效（如切换账号、密钥被回收时）。
+// 转发自 foundation，避免调用方为此单独依赖 @tencentcloud/foundation。
+export { CredentialCache } from '@tencentcloud/foundation'

@@ -1,48 +1,18 @@
 import { AbilityConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
-import { CosXmlBaseService, CosXmlServiceConfig, QCloudCredential,QCloudLogger } from '@tencentcloud/cos';
-import { Credential } from '../Credential';
-import { Const, CredentialType } from '../Const';
-import { rcp } from '@kit.RemoteCommunicationKit';
+import { CosXmlBaseService } from '@tencentcloud/cos';
+import { CosServiceHelper } from '../utils/CosServiceHelper';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
     CosXmlBaseService.setDebuggable(true);
-    // QCloudLogger.logOutputCallback = (log)=>{
-    //   console.log("logOutputCallback" + log);
-    // }
-    if(Const.CREDENTIAL_TYPE === CredentialType.STS){
-      // 临时密钥
-      CosXmlBaseService.initDefaultService(
-        this.context.getApplicationContext(),
-        new CosXmlServiceConfig(Const.TEST_BUCKET_REGION),
-        Credential.sessionCredential
-      )
-      new CosXmlBaseService(this.context.getApplicationContext(),new CosXmlServiceConfig(Const.TEST_BUCKET_REGION),Credential.sessionCredential)
-    } else if(Const.CREDENTIAL_TYPE === CredentialType.CONST) {
-      // 固定密钥
-      let config = new CosXmlServiceConfig(Const.TEST_BUCKET_REGION);
-      config.retrySleep = 5 * 1000;
-      // config.readTimeout = 30 * 1000 * 1000;
-      const customDnsServers: rcp.DnsServers = [
-        { ip: "8.8.8.8" },
-        { ip: "8.8.4.4", port: 53 }
-      ];
-      config.dnsConfiguration = {dnsRules:customDnsServers};
-      CosXmlBaseService.initDefaultService(
-        this.context.getApplicationContext(),
-        config,
-        Credential.constCredential
-      )
-    } else {
-      // 无密钥（单独给request设置密钥或者匿名模式）
-      CosXmlBaseService.initDefaultService(
-        this.context.getApplicationContext(),
-        new CosXmlServiceConfig(Const.TEST_BUCKET_REGION)
-      )
-    }
+    // 按当前开关初始化默认服务（默认关闭 = 使用默认 rcp 网络层）
+    CosServiceHelper.initDefaultService(
+      this.context.getApplicationContext(),
+      CosServiceHelper.isUseCustomNetwork()
+    );
   }
 
 

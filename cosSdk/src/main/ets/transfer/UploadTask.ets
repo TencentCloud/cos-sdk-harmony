@@ -107,14 +107,8 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
   private uploadedSize: number = 0;
   private startPartNumber: number = 0;
   private uploadBodyIsCompleted: boolean = false;
-  private state = TransferState.Waiting;
 
-  private updateState(state: TransferState) {
-    this.state = state;
-    // if (this.onState) {
-    //   this.onState(this.state);
-    // }
-  }
+  // state / updateState 已上提至基类 TransferTask，由上传、下载任务共用。
 
   public initCallBack: Callback<string> | undefined;
 
@@ -135,19 +129,25 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
 
   start(): void {
     try {
-      this.executeTask()
+      // 先置 Processing 再执行：executeTask() 内部失败时会置 Error，
+      // 若顺序颠倒会把 Error 覆写回 Processing。
       this.updateState(TransferState.Processing);
+      this.executeTask()
     } catch (e) {
+      this.markErrorIfActive();
       this.onFail(this.request, e);
     }
   }
 
   pause(): void {
     try {
-      this.onFail(this.request, new CosTransferPauseError())
+      // 先更新状态再回调，保证外部在收到 onFail(USER_PAUSED) 时读到的状态已是 Pause；
+      // 同时也让后续在途请求的失败被 markErrorIfActive 正确拦截。
       this.updateState(TransferState.Pause);
+      this.onFail(this.request, new CosTransferPauseError())
       this.cancelRequest();
     } catch (e) {
+      this.markErrorIfActive();
       this.onFail(this.request, e);
     }
   }
@@ -155,9 +155,13 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
   resume(): void {
     if (this.uploadId) {
       try {
-        this.resumeUpload(this.uploadId);
+        // pause() 已置位失败标记，此处复位，保证恢复后的真实失败仍能通知外部
+        this.resetFailedFlag();
+        // 先置 Processing，理由同 start()
         this.updateState(TransferState.Processing);
+        this.resumeUpload(this.uploadId);
       } catch (e) {
+        this.markErrorIfActive();
         this.onFail(this.request, e);
       }
     } else {
@@ -176,6 +180,8 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
         QCloudLogger.info(`cancel upload,uploadId:${this.uploadId}`, 'UploadTask');
         let request = new AbortMultiUploadRequest(this.request.bucket!, this.request.cosPath, this.uploadId!);
         request.credential = this.request.credential;
+        // 子请求必须继承原请求的 region，否则回落到 config.region 导致跨地域失败
+        request.region = this.request.region;
         request.addHeaders(this.request.getHeaders());
         request.addQueries(this.request.getQueries());
         request.addNoSignHeaderKeys(this.request.noSignHeaderKeys);
@@ -191,10 +197,12 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
         } catch (e) {
         }
       }
-      this.onFail(this.request, new QCloudUserCancelError())
+      // 先更新状态再回调，理由同 pause()
       this.updateState(TransferState.Canceled);
+      this.onFail(this.request, new QCloudUserCancelError())
       this.cancelRequest();
     } catch (e) {
+      this.markErrorIfActive();
       this.onFail(this.request, e);
       this.cancelRequest();
     }
@@ -209,7 +217,7 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
   public executeTask() {
     if (!this.request.body) {
       this.onFail(this.request, new CosInvalidArgumentError('Upload file cannot be empty'));
-      this.updateState(TransferState.Error);
+      this.markErrorIfActive();
       return;
     }
 
@@ -228,7 +236,7 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
       this.simpleUpload();
     } else {
       this.onFail(this.request, new CosInvalidArgumentError("Unsupported upload type"));
-      this.updateState(TransferState.Error);
+      this.markErrorIfActive();
       this.cancelRequest();
     }
   }
@@ -236,7 +244,12 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
   private async simpleUpload() {
     QCloudLogger.info(`begin simpleUpload,cosPath:${this.request.cosPath}`, 'UploadTask');
     let request: PutObjectRequest = new PutObjectRequest(this.request.bucket!, this.request.cosPath, this.request.body);
+    // 内部新建的子请求必须继承原请求的 region，否则会回落到 config.region，
+    // 导致「per-request region」语义失效（跨地域上传会 404 NoSuchBucket）。
+    request.region = this.request.region;
     request.credential = this.request.credential;
+    // 子请求必须继承原请求的 region，否则回落到 config.region 导致跨地域失败
+    request.region = this.request.region;
     request.addHeaders(this.request.getHeaders());
     request.addQueries(this.request.getQueries());
     request.addNoSignHeaderKeys(this.request.noSignHeaderKeys);
@@ -255,7 +268,7 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
       this.requestCacheArray.clear();
     } catch (e) {
       this.onFail(this.request, e);
-      this.updateState(TransferState.Error);
+      this.markErrorIfActive();
       this.cancelRequest();
     }
   }
@@ -278,7 +291,7 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
       this.continueMultiUpload(result);
     } catch (e) {
       this.onFail(this.request, e);
-      this.updateState(TransferState.Error);
+      this.markErrorIfActive();
       this.cancelRequest();
     }
   }
@@ -290,6 +303,8 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
     do {
       let request = new ListPartsRequest(this.request.bucket!, this.request.cosPath, uploadId);
       request.credential = this.request.credential;
+      // 子请求必须继承原请求的 region，否则回落到 config.region 导致跨地域失败
+      request.region = this.request.region;
       request.priority = QCloudPriority.High;
       request.partNumberMarker = result?.listParts?.nextPartNumberMarker;
       request.addHeaders(this.request.getHeaders());
@@ -320,6 +335,13 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
 
   private continueMultiUpload(result: ListPartsResult) {
     this.uploadedParts = new List();
+    // 续传时必须重置断点切分状态，让 getFileLocalUploadParts() 从文件头重新切分全部分块，
+    // 再与 listParts 返回的已上传分块比对，只补传缺失分块。否则暂停前残留的
+    // uploadedSize/startPartNumber 会让切分从中间开始，已上传分块（partNumber 1..N）
+    // 被漏加进 uploadedParts，complete 时缺块导致续传失败/对象损坏。
+    this.uploadedSize = 0;
+    this.startPartNumber = 0;
+    this.isChange = false;
     let allparts = this.getFileLocalUploadParts();
     let existMap = new Map<string, ListPartsPart>()
     for (const item of result.listParts?.part || []) {
@@ -378,7 +400,7 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
         break;
       }
 
-      let part2 = existParts.get(+1);
+      let part2 = existParts.get(i + 1);
       if (parseInt(part1.partNumber) + 1 != parseInt(part2.partNumber)) {
         break;
       }
@@ -390,6 +412,8 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
     QCloudLogger.info(`begin initPartUpload,cosPath:${this.request.getPath()}`, 'UploadTask');
     let request = new InitMultipartUploadRequest(this.request.bucket!, this.request.getPath());
     request.credential = this.request.credential;
+    // 子请求必须继承原请求的 region，否则回落到 config.region 导致跨地域失败
+    request.region = this.request.region;
     request.priority = QCloudPriority.High;
     request.addHeaders(this.request.getHeaders());
     request.addQueries(this.request.getQueries());
@@ -414,7 +438,7 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
       this.uploadParts(result);
     } catch (e) {
       this.onFail(this.request, e);
-      this.updateState(TransferState.Error);
+      this.markErrorIfActive();
       this.cancelRequest();
     }
   }
@@ -436,6 +460,8 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
         new UploadPartRequest(this.request.bucket!, this.request.cosPath, this.uploadId!, (body.index + 1).toString(),
           body);
       request.credential = this.request.credential;
+      // 子请求必须继承原请求的 region，否则回落到 config.region 导致跨地域失败
+      request.region = this.request.region;
       request.addHeaders(this.request.getHeaders());
       request.removeHeader(HttpHeader.CONTENT_TYPE)
       request.removeHeader(HttpHeader.CONTENT_LENGTH)
@@ -493,6 +519,8 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
   private async finishUpload(uploadId: string) {
     let request = new CompleteMultiUploadRequest(this.request.bucket!, this.request.cosPath, uploadId);
     request.credential = this.request.credential;
+    // 子请求必须继承原请求的 region，否则回落到 config.region 导致跨地域失败
+    request.region = this.request.region;
     request.priority = QCloudPriority.High;
     request.addHeaders(this.request.getHeaders());
     request.removeHeader(HttpHeader.CONTENT_TYPE)
@@ -526,7 +554,7 @@ export class UploadTask extends TransferTask<PutObjectRequest, CosXmlUploadTaskR
     } catch (e) {
       QCloudLogger.info(`finishUpload error:${JSON.stringify(e)},uploadId:${this.uploadId}}`, 'UploadTask');
       this.onFail(this.request, e);
-      this.updateState(TransferState.Error);
+      this.markErrorIfActive();
       this.cancelRequest();
     }
   }

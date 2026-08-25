@@ -55,6 +55,10 @@ export class QCloudTask {
   async buildRequestData(){
     return true;
   }
+
+  /* 通过网络层执行请求，由 QCloudHTTPTask 重写 */
+  startNetworkExecute(){
+  }
   /**/
   async executeTask(){
     await this.buildRequestData();
